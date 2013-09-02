@@ -10,10 +10,12 @@ public abstract class Agent {
 	protected Attack attack;
 	protected Defense defense;
 	protected ArrayList<Transaction> trans;
-	protected Account acc;
+	protected Account account;  
 	
 	public Agent() { 
-		
+		account = new Account(); // need to instantiate to avoid null pointer exception error
+                                         // can't instantiate attack and defense since they are abstract classes
+
 	}
 	
 	public Agent(int id, double reputation) {
@@ -36,6 +38,10 @@ public abstract class Agent {
 	public void setReputation(double reputation) {
 		this.reputation = reputation;
 	}
-	
-	
+	public void setAccount(double balance){ //added by neel
+            account.editBalance(balance);
+        }
+	public Account getAccountDetails(){  //added by neel
+            return account;
+        }
 }
