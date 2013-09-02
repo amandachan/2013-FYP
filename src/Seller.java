@@ -8,6 +8,7 @@ public class Seller extends Agent{
 	private ArrayList<Product> productsOnSale;
 	private ArrayList<Buyer> buyersRated;
 	private ArrayList<Buyer> buyersRatedMe;
+	private Product product;
 	
 	public ArrayList<Rating> getRatingsToBuyers() {
 		return ratingsToBuyers;

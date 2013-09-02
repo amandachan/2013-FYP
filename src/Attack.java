@@ -1,6 +1,6 @@
 
 public abstract class Attack {
-	protected String type;
 	protected int day;
-	abstract void giveUnfairRating();
+	protected Agent ag;
+	abstract void giveUnfairRating(int id);
 }

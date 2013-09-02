@@ -2,7 +2,7 @@ import java.util.ArrayList;
 
 
 public class Account {
-
+	private Agent ag;
 	private double balance;
 	private ArrayList<Transaction> transactionList;
 	

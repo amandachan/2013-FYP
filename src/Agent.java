@@ -1,10 +1,17 @@
+import java.util.ArrayList;
+
 
 public abstract class Agent {
 
 	protected int id;
 	protected double reputation;
-	protected Attack attackModel;
-	protected Defense defenseModel;
+	protected String defenseName;
+	protected String attackName;
+	protected Attack attack;
+	protected Defense defense;
+	protected ArrayList<Transaction> trans;
+	protected Account acc;
+	
 	public Agent() { 
 		
 	}
