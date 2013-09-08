@@ -8,7 +8,9 @@ public class Rating {
 	private int rater;
 	private int ratee;
 	
-	public void create(){
+	public void create(int sid, int bid){
+		this.rater = bid;
+		this.ratee = sid;
 		
 	}
 	
