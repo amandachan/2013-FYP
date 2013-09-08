@@ -6,4 +6,7 @@ public class EvaluationMetrics {
 	private double mcc;
 	private double robustness;
 	private double bankBalance;
+	
+	
+	
 }
