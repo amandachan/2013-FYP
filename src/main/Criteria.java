@@ -3,7 +3,12 @@ package main;
 public class Criteria {
 
 	private double value;
-	private int id;
+	private int id; //unsure what this id represents
+	
+	public Criteria(double value, int id){
+		this.id = id;
+		this.value = value;
+	}
 	
 	public double getCriteriaRatingValue() {
 		return value;

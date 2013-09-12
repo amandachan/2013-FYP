@@ -4,17 +4,23 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
+import agent.Buyer;
+import agent.Seller;
+
+import weka.core.Instance;
+import weka.core.Instances;
+
 import main.Parameter;
 import main.Product;
+import main.Rating;
 
 import distributions.PseudoRandom;
 
 
 public class AlwaysUnfair extends Attack{
-
-	private Random randomGenerator;
-
-	public int chooseSeller(){
+	
+	//randomly choose seller
+	public Seller chooseSeller(){
 		//attack the target sellers with probability (Para.m_targetDomination), attack common sellers randomly with 1 - probability
 		int sellerid;
 		if(PseudoRandom.randDouble() < Parameter.m_dishonestBuyerOntargetSellerRatio){ //Para.m_targetDomination
@@ -23,44 +29,30 @@ public class AlwaysUnfair extends Attack{
 			//1 + [0, 18) = [1, 19) = [1, 18]
 			sellerid = 1 + (int) (PseudoRandom.randDouble() * (Parameter.NO_OF_DISHONEST_SELLERS + Parameter.NO_OF_HONEST_SELLERS - 2));
 		}
-		return sellerid;
+		Seller s = new Seller();
+		return s.getSeller(sellerid);
 	}
 
-	public int chooseProduct(int sellerid){
+	//give unfair rating to seller
+	public double giveUnfairRating(Instance inst){
+		String bHonestVal = inst.stringValue(Parameter.m_bHonestIdx);				
+		// find the dishonest buyer in <day>, give unfair rating
+		if (bHonestVal == Parameter.agent_honest){
+			System.out.println("error, must be dishonest buyer");
+		}
+		//rating is always unfair
+		int sVal = (int)(inst.value(Parameter.m_sidIdx));
+		double unfairRating = complementRating(sVal);
+		double rVal = unfairRating;		
 		
-		//get hashmap of seller id & product id
-		HashMap<Integer, ArrayList<Integer>> prodList = new HashMap<Integer, ArrayList<Integer>>();
-		Product p = new Product();
-		prodList = p.getProductid();
+		// add the unfair rating to instances		
+		inst.setValue(Parameter.m_ratingIdx, rVal);
 		
-		//get list of products sold by the seller
-		ArrayList<Integer> prodid = new ArrayList<Integer>();
-		prodid = prodList.get(sellerid);
-		
-		//randomly select product from list of products
-		int pid = randomGenerator.nextInt(prodid.size());
-		return pid;
-
+		//update the eCommerce information
+//*****		ecommerce.getTransactions().add(new Instance(inst));	
+//*****		ecommerce.updateArray(inst);
+		return rVal;
 	}
-
-	public double buyProduct(int productid){
-
-		//get hashmap of product id and sale price
-		HashMap<Integer, Double> priceList = new HashMap<Integer, Double>();
-		Product p = new Product();
-		priceList = p.getSaleprice();
-		
-		//get price of product
-		double price = priceList.get(productid);
-		return price;
-	}
-
-	public void giveUnfairRating(int id){
-
-	}
-
-
-
 
 
 }

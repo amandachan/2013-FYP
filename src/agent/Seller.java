@@ -48,12 +48,5 @@ public class Seller extends Agent{
 		this.buyersRated = buyersRated;
 	}
 	
-	public Seller getSeller(int id){
-		Seller s = null;
-		if (this.id == id){
-			s = this;
-		}
-		return s;
-	}
 	
 }

@@ -11,15 +11,15 @@ public class Product {
 	//key is product id, value is sale price
 	private HashMap<Integer, Double> saleprice = new HashMap<Integer, Double>();
 
-	
-/*	public int getProduct(int sellerid){
+
+	public int getProduct(int sellerid){
 		//get list of products sold by the seller
 		ArrayList<Integer> prodid = new ArrayList<Integer>();
 		prodid = productid.get(sellerid);
 		//randomly select product from list of products
         int productid = randomGenerator.nextInt(prodid.size());
         return productid;
-	}*/
+	}
 	
 	public int getNoOfProducts() {
 		return noOfProducts;
@@ -55,5 +55,6 @@ public class Product {
 		double price = saleprice.get(productid);
 		return price;
 	}
+	
 	
 }

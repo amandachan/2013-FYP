@@ -4,17 +4,24 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
+import agent.Buyer;
+import agent.Seller;
+
 
 public class Transaction {
 
-	private int buyer;
-	private int seller;
+	private Buyer buyer;
+	private Seller seller;
 	private int product;
 	private String time;
 	private double amountPaid;
-	private double rating;
+	private Rating rating;
 	
-	public Transaction(int buyer, int seller, int product, double amountPaid){
+	public Transaction(){
+
+	}
+	
+	public void create(Buyer buyer, Seller seller, int product, double amountPaid, double value, int cid){
 		this.buyer = buyer;
 		this.seller = seller;
 		this.product = product;
@@ -23,9 +30,8 @@ public class Transaction {
     	cal.getTime();
     	SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
     	time = sdf.format(cal.getTime());
-	}
-	public void create(){
-
+    	this.rating = new Rating();
+    	rating.create(seller, buyer, value, cid);
 	}
 	
 	public void edit(){
@@ -37,11 +43,11 @@ public class Transaction {
 		return t;
 	}
 
-	public int getBuyer() {
+	public Buyer getBuyer() {
 		return buyer;
 	}
 
-	public int getSeller() {
+	public Seller getSeller() {
 		return seller;
 	}
 
@@ -53,9 +59,11 @@ public class Transaction {
 		return amountPaid;
 	}
 
-	public double getRating() {
+	public Rating getRating() {
 		return rating;
 	}
+	
+
 	
 	public Transaction getTransaction(){
 		Transaction t = null;

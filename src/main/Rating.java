@@ -1,16 +1,33 @@
 package main;
 import java.util.ArrayList;
 
+import agent.Buyer;
+import agent.Seller;
+
 
 public class Rating {
 
 	private ArrayList<Criteria> criteriaRatings;
-	private int rater;
-	private int ratee;
+	private Buyer rater;
+	private Seller ratee;
 	
-	public void create(int sid, int bid){
+	public Rating(){
+		
+	}
+	
+	public ArrayList<Criteria> getCriteriaRatings() {
+		return criteriaRatings;
+	}
+
+	public void setCriteriaRatings(ArrayList<Criteria> criteriaRatings) {
+		this.criteriaRatings = criteriaRatings;
+	}
+
+	public void create(Seller sid, Buyer bid, double value, int id){
 		this.rater = bid;
 		this.ratee = sid;
+		Criteria c = new Criteria(value ,id);
+		criteriaRatings.add(c);
 		
 	}
 	
