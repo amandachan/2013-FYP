@@ -28,7 +28,8 @@ public abstract class Defense {
 	protected int m_NumInstances;	
 	
 	//protected int[][][] BSR;   		// to store the [buyer][seller][binary rating -1, 1]
-	protected ArrayList<Double> trustOfAdvisors = new ArrayList<Double>(); 		// store the trustworthiness of advisors;
+	protected ArrayList<Double> trustOfAdvisors = new ArrayList<Double>(); 
+	// store the trustworthiness of advisors;
 	// for statistic features
 	protected ArrayList<Double> rtimes = new ArrayList<Double>();
 	
@@ -43,6 +44,7 @@ public abstract class Defense {
 	
 	public void seteCommerce(Environment ec){
 		ecommerce = ec; 
+		
 	}
 	
 	//perform the defense model
@@ -91,6 +93,9 @@ public abstract class Defense {
 	private ArrayList<Integer> cofusionMatrix() {
 		// true positive, false negative, false positive, true negative,
 		ArrayList<Integer> cmVals = new ArrayList<Integer>();
+		for(int i=0; i<4; i++){
+			cmVals.add(i, 0);
+		}
 		for (int k = 0; k < totalBuyers; k++) {
 			int aid = k;
 			int value = 0;

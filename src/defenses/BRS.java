@@ -23,7 +23,7 @@ public class BRS extends Defense{
 	private boolean iterative;
 
 	public int chooseSeller(Buyer honestBuyer) {
-            System.out.println("in chooseseller method");
+		//System.out.println("in chooseseller method");
 		//calculate the trust values on target seller		
 		ArrayList<Double> trustValues = new ArrayList<Double>();
 		ArrayList<Double> mccValues = new ArrayList<Double>();
@@ -53,12 +53,11 @@ public class BRS extends Defense{
 	}
 
 	public double calculateTrust(int seller, Buyer honestBuyer){
-		trustOfAdvisors = new ArrayList<Double>();
 		int bid = honestBuyer.getId();
 		double rep_aBS = 0.5;
 		trustAdvisors = new ArrayList<Boolean>();
 
-                int aid =0;
+		int aid =0;
 		//find buyers that have transaction with seller
 		for (int j = 0; j < totalBuyers; j++) {
 			aid = j;
@@ -80,65 +79,84 @@ public class BRS extends Defense{
 			}
 
 		}
-		boolean iterative = true;
+		//boolean iterative = true;
 		do {
 			iterative = false;
 			//calculate reputation for seller based on all buyers
 			calculateReputation1(honestBuyer, seller);
+		//	System.out.println("HELLO");
 			calculateReputation2(honestBuyer, seller);
-		} while(iterative=true);
+		} while(iterative);
 
 		ArrayList<Integer> storedAdvisors = honestBuyer.getAdvisors();
 		storedAdvisors.clear(); double bsr0=0; double bsr1=0;
-		ArrayList<Double> np_BAforS = new ArrayList<Double>();	
-		for (int j = 0; j < totalBuyers; j++) {
-			 aid = j;
+		ArrayList<Double> np_BAforS = new ArrayList<Double>(2);	
+		for(int i=0; i<totalBuyers; i++){
+			trustOfAdvisors.add(i, 0.0);
+		}
+		for(int i=0; i<2; i++){
+			np_BAforS.add(i, 0.0);
+		}
+		for (int n = 0; n < totalBuyers; n++) {
+			aid = n;
 			if (aid == bid)continue;  //ignore its own rating
-			if (trustAdvisors.set(aid, false))continue; //buyer no transaction with seller
+			if (trustAdvisors.get(aid)== false)continue; //buyer no transaction with seller
 			trustOfAdvisors.set(aid, 1.0);
+			//System.out.println("/ " );
 
-			for(int i=0; i<honestBuyer.getBuyer(aid).getTrans().size(); i++){
-				if(honestBuyer.getBuyer(aid).getTrans().get(i).getSeller()==seller && i==0){
+			for(int f=0; f<honestBuyer.getBuyer(aid).getTrans().size(); f++){
+				//System.out.println("BSR0 " );
+
+				if(honestBuyer.getBuyer(aid).getTrans().get(f).getSeller()==seller && f==0){
 					bsr0 = np_BAforS.get(0) + honestBuyer.getBuyer(aid).getTrans().get(0).getRating().getCriteriaRatings().get(0).getCriteriaRatingValue();
 				}
-				if(honestBuyer.getBuyer(aid).getTrans().get(i).getSeller()==seller && i==1){
-					bsr1 = np_BAforS.get(1) + honestBuyer.getBuyer(aid).getTrans().get(1).getRating().getCriteriaRatings().get(1).getCriteriaRatingValue();
+				if(honestBuyer.getBuyer(aid).getTrans().get(f).getSeller()==seller && f==1){
+					bsr1 = np_BAforS.get(1) + honestBuyer.getBuyer(aid).getTrans().get(1).getRating().getCriteriaRatings().get(0).getCriteriaRatingValue();
 				}
 			}
+			
+			
 			np_BAforS.set(0, bsr0);
 			np_BAforS.set(1, bsr1);
-
+			//System.out.println(np_BAforS.get(0) );
 			//consider the trust of advisors to two target sellers in duopoly e-marketplaces
 			storedAdvisors.add(aid);
 			honestBuyer.setTrustAdvisor(aid, 1.0);
 		}
 		honestBuyer.calculateAverageTrusts(seller);  //get the average trust of advisors based on seller
-		rep_aBS = (np_BAforS.get(1) + 1.0 * Parameter.m_laplace) / (np_BAforS.get(0) + np_BAforS.get(1) + 2.0 * Parameter.m_laplace);
 
+		rep_aBS = (np_BAforS.get(1) + 1.0 * Parameter.m_laplace) / (np_BAforS.get(0) + np_BAforS.get(1) + 2.0 * Parameter.m_laplace);
+		//System.out.println("HAHAHHAHA RATING " + rep_aBS);
 		return rep_aBS;
 	}
 
 	// step 1: calculate the reputation for seller based on all buyers.
 	public void calculateReputation1(Buyer b, int sid){
 		ArrayList<Double> BS_npSum = new ArrayList<Double>();
+		for(int i=0; i<2; i++){
+			BS_npSum.add(i, 0.0);
+		}
 		double bsr0 =0; double bsr1=0;
-		for (int j = 0; j < totalBuyers; j++) {
-			int aid = j;
+		//System.out.println("ARGHARGH" + totalBuyers);
+		for (int m = 0; m < totalBuyers; m++) {
+			int aid = m;
+			//System.out.println("LOOP" + aid);
 			if (aid == b.getId())continue;  //ignore its own rating
 			if (trustAdvisors.get(aid) == false)continue;	//no transaction with seller
-                        System.out.println("buyer12345" + b.getListOfBuyers().size());
+			//System.out.println("buyer12345" + b.getListOfBuyers().size());
 			for(int i=0; i<b.getListOfBuyers().get(aid).getTrans().size(); i++){
 				if(b.getBuyer(aid).getTrans().get(i).getSeller()==sid && i==0){
 					bsr0 = BS_npSum.get(0) + b.getBuyer(aid).getTrans().get(0).getRating().getCriteriaRatings().get(0).getCriteriaRatingValue();
 				}
 				if(b.getBuyer(aid).getTrans().get(i).getSeller()==sid && i==1){
-					bsr1 = BS_npSum.get(1) + b.getBuyer(aid).getTrans().get(1).getRating().getCriteriaRatings().get(1).getCriteriaRatingValue();
+					bsr1 = BS_npSum.get(1) + b.getBuyer(aid).getTrans().get(1).getRating().getCriteriaRatings().get(0).getCriteriaRatingValue();
 				}
 			}
-			BS_npSum.set(0, bsr0);
-			BS_npSum.set(1, bsr1);
+			BS_npSum.add(0, bsr0);
+			BS_npSum.add(1, bsr1);
 			//BS_npSum[0] += BSR[aid][sid][0];
 			//BS_npSum[1] += BSR[aid][sid][1];
+			//System.out.println("HH");
 		}
 		rep_aBS = (BS_npSum.get(1) + 1.0) / (BS_npSum.get(0) + BS_npSum.get(1) + 2.0);
 	}
@@ -155,7 +173,7 @@ public class BRS extends Defense{
 					bsr0 = b.getBuyer(aid).getTrans().get(0).getRating().getCriteriaRatings().get(0).getCriteriaRatingValue();
 				}
 				if(b.getBuyer(aid).getTrans().get(i).getSeller()==sid && i==1){
-					bsr1 =b.getBuyer(aid).getTrans().get(1).getRating().getCriteriaRatings().get(1).getCriteriaRatingValue();
+					bsr1 =b.getBuyer(aid).getTrans().get(1).getRating().getCriteriaRatings().get(0).getCriteriaRatingValue();
 				}
 			}
 

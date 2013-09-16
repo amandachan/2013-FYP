@@ -63,12 +63,12 @@ public abstract class Environment {
   //  protected HashMap<Seller,Double> m_DailyMCC = new HashMap();
 
         protected Environment(){           // default constructor
-            buyerList = new ArrayList();
-            sellerList = new ArrayList();
-            transactionList = new ArrayList();
+            buyerList = new ArrayList<Buyer>();
+            sellerList = new ArrayList<Seller>();
+            transactionList = new ArrayList<Transaction>();
 
-        m_SellersTrueRating = new HashMap();
-        m_SellersTrueRep = new HashMap();
+        m_SellersTrueRating = new HashMap<Seller, Double>();
+        m_SellersTrueRep = new HashMap<Seller, Double>();
         Day =0;
          }
         Environment(ArrayList<Buyer> buyerList,ArrayList<Seller> sellerList, ArrayList<Transaction> transactionList){
@@ -118,7 +118,7 @@ public abstract class Environment {
           m_AttackName = new String(attackName);
           m_DefenseName = new String(defenseName);
 
-        System.out.println("entered environment");
+      //  System.out.println("entered environment");
         } // parameterSetting()
 
             public Instances initialInstancesHeader(){
@@ -190,8 +190,8 @@ public abstract class Environment {
         public void assignTruth(){
 
 
-         System.out.println("enters assign truth");
-         System.out.println("is seller list empty?  "+this.sellerList.isEmpty());
+       //  System.out.println("enters assign truth");
+       //  System.out.println("is seller list empty?  "+this.sellerList.isEmpty());
         //assign the true rating for sellers
         if(Parameter.RATING_TYPE.compareTo("binary") == 0){
           for(int i = 0; i < Parameter.NO_OF_DISHONEST_SELLERS; i++){
@@ -287,7 +287,7 @@ public abstract class Environment {
 
         public void agentSetting(String attackName, String defenseName) throws ClassNotFoundException, NoSuchMethodException, SecurityException{
 
-        System.out.println("enters agent Setting");
+    //    System.out.println("enters agent Setting");
 
         int numBuyers = Parameter.NO_OF_DISHONEST_BUYERS + Parameter.NO_OF_HONEST_BUYERS;
         int numSellers = Parameter.NO_OF_DISHONEST_SELLERS+Parameter.NO_OF_HONEST_SELLERS;
@@ -298,45 +298,54 @@ public abstract class Environment {
 
         for(int i = 0; i < numBuyers; i++){
             int bid = i;
-            if(bid < Parameter.NO_OF_DISHONEST_BUYERS || bid <= numBuyers){
+            if(bid < Parameter.NO_OF_DISHONEST_BUYERS || bid >= numBuyers){
 
                 Buyer b = new Buyer();
                 b.setId(bid);b.setAttackName(attackName);b.attackSetting(attackName);
                 b.setIshonest(false);
               
               //  b.setListOfSellers(sellerList);
-                buyerList.add(b);
-                  b.setListOfBuyers(buyerList);
+                buyerList.add(bid,b);
+             //   System.out.println("SIZE" + buyerList.size());
                 //buyerList.add(new Buyer(bid,false,attackName));
                 //m_buyers[i] = new Buyer(bid, false, attackName, m_eCommerce);
             } if(bid < Parameter.NO_OF_HONEST_BUYERS || bid <= numBuyers){
                 Buyer b = new Buyer();
                 b.setId(bid);b.setIshonest(true);b.setDefenseName(defenseName);b.defenseSetting(defenseName);
-                buyerList.add(b);
+                buyerList.add(bid,b);
                 //buyerList.add(new Buyer(bid,true,defenseName));
                 //m_buyers[i] = new Buyer(bid, true, defenseName, m_eCommerce);
             }
 
         }
+        
+
         for(int k = 0; k < numSellers; k++){
             int sid = k;
             if(sid < Parameter.NO_OF_DISHONEST_SELLERS){
 
                 Seller s = new Seller();
                 s.setId(sid);s.setIshonest(false);
-                sellerList.add(s);
+                sellerList.add(sid,s);
                 //sellerList.add(new Seller(bid,false));
                 // m_sellers[k] = new Seller(sid, false, m_eCommerce);
             } else{
 
                 Seller s = new Seller();
                 s.setId(sid);s.setIshonest(true);
-                sellerList.add(s);
+                sellerList.add(sid,s);
                // sellerList.add(new Seller(bid,true));
                 //m_sellers[k] = new Seller(sid, true, m_eCommerce);
             }
         }
-
+        for(int i=0; i<numBuyers; i++){
+        	buyerList.get(i).setListOfBuyers(buyerList);
+        	buyerList.get(i).setListOfSellers(sellerList);
+        }
+        for(int i=0; i<numSellers; i++){
+        	sellerList.get(i).setListOfBuyers(buyerList);
+        	sellerList.get(i).setListOfSellers(sellerList);
+        }
         //set up the global information for buyers;
       //  for(int i = 0; i < numBuyers; i++){           DO WE NEED THIS?????
       //      m_buyers[i].setGlobalInformation(m_buyers, m_sellers);
@@ -361,7 +370,7 @@ public abstract class Environment {
             }
         }*/
 
-        System.out.println("seller list size "+sellerList.size());
+     //   System.out.println("seller list size "+sellerList.size());
     } //agentSetting
        public String getDefenseName(){
            return m_DefenseName;

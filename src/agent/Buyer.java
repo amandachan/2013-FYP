@@ -47,10 +47,15 @@ public class Buyer extends Agent{
 
 
 	public Buyer (int id){
+
+		//System.out.println("SIZE OF LIST" + trusts.size());
 		this.id = id;
+		
 	}
 
 	public Buyer(){
+		//System.out.println("SIZE OF LIST" + trusts.size());
+
 	}
 
 	public boolean isIshonest() {
@@ -213,7 +218,7 @@ public class Buyer extends Agent{
 	
 	//create transaction that includes buyer, seller and product
 	public void addTransaction(int day){
-		System.out.println("enters addTransaction");
+		//System.out.println("enters addTransaction");
              //  Seller s1=new Seller();
                 this.day = day;
 		//*****	Instances transactions = ecommerce.getTransactions();
@@ -223,7 +228,7 @@ public class Buyer extends Agent{
 		String bHonestVal;
 		if (ishonest==false){ //attack
 			//select seller and product, then create transaction
-		 System.out.println("enters ishonest check");
+		 //System.out.println("enters ishonest check");
                      s1 = attackModel.chooseSeller();
 			bHonestVal = Parameter.agent_dishonest;
 		}
@@ -235,6 +240,7 @@ public class Buyer extends Agent{
 		//productid = chooseProduct(s1);
 		//salePrice = buyProduct(productid);
 		Transaction t = new Transaction();
+rateSeller(day);
 		t.create(this, s1, 1, 1, 1.0, day, 1.0, currentRating, s1);
 		sellersRated.add(s1);
 		//productsPurchased.add(productid);
@@ -367,6 +373,11 @@ public class Buyer extends Agent{
 	}
 
 	public void setTrustAdvisor(int aid, double trust){
+		if(trusts.size()==0){
+			for(int i=0; i<listOfBuyers.size(); i++){
+				trusts.add(i, 0.0);
+			}
+		}
 		trusts.set(aid, trust);
 	}
 
