@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import weka.core.Instance;
-import environment.Environment;
+import environment.*;
 
 import main.Product;
 import main.Rating;
@@ -15,7 +15,7 @@ import main.Parameter;
 
 
 public abstract class Defense {
-	protected Environment ecommerce = null;	
+	protected Environment ecommerce = null;
 
 	protected int day;
 	protected int dhBuyer = Parameter.NO_OF_DISHONEST_BUYERS;
@@ -37,11 +37,11 @@ public abstract class Defense {
 	//reputation for seller based on one buyer
 	public abstract void calculateReputation2(Buyer buyer, int sid);
 	//public abstract Rating calculateReputation3(int b, int p);
-	public abstract double calculateTrust(Seller seller, Buyer honestBuyer);
-	public abstract Seller chooseSeller(Buyer b);
+	public abstract double calculateTrust(int seller, Buyer honestBuyer);
+	public abstract int chooseSeller(Buyer b);
 	
 	
-	public void seteCommerce(Environment ec){		
+	public void seteCommerce(Environment ec){
 		ecommerce = ec; 
 	}
 	

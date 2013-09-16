@@ -29,7 +29,7 @@ public class Buyer extends Agent{
 	private boolean ishonest;
 	private ArrayList<Rating> ratingsToProducts;
 	private ArrayList<Integer> productsPurchased;
-	private ArrayList<Seller> sellersRated;
+	private ArrayList<Integer> sellersRated = new ArrayList<Integer>();
 
 	//buyer's current rating (the most recent rating made by the buyer)
 	private double currentRating;
@@ -109,8 +109,8 @@ public class Buyer extends Agent{
 	}
 
 	//set attack model
-	private Attack attackSetting(String attackName){		
-		Attack attackModel= null;		
+	public Attack attackSetting(String attackName){
+		Attack attackModel= new AlwaysUnfair();
 		try{
 			Class<?> class1 = Class.forName("attacks."+attackName.trim());
 			Constructor<?> cons = class1.getDeclaredConstructor();
@@ -138,8 +138,8 @@ public class Buyer extends Agent{
 	}
 
 	//set defense model
-	private Defense defenseSetting(String defenseName) throws ClassNotFoundException, NoSuchMethodException, SecurityException{
-		Defense defenseModel= null;
+	public Defense defenseSetting(String defenseName) throws ClassNotFoundException, NoSuchMethodException, SecurityException{
+		 defenseModel=  new BRS();
 		try{
 			Class class1 = Class.forName("defenses."+defenseName.trim());
 			Constructor cons = class1.getDeclaredConstructor();
@@ -212,16 +212,19 @@ public class Buyer extends Agent{
 	}
 	
 	//create transaction that includes buyer, seller and product
-	public Instance addTransaction(){
-		Seller s1=null;
+	public void addTransaction(int day){
+		System.out.println("enters addTransaction");
+             //  Seller s1=new Seller();
+                this.day = day;
 		//*****	Instances transactions = ecommerce.getTransactions();
 		double rVal = Parameter.nullRating();
-		int dVal, bVal, sVal, productid;
+		int dVal, bVal, sVal, productid, s1=0;
 		double salePrice;
 		String bHonestVal;
 		if (ishonest==false){ //attack
 			//select seller and product, then create transaction
-			s1 = attackModel.chooseSeller();
+		 System.out.println("enters ishonest check");
+                     s1 = attackModel.chooseSeller();
 			bHonestVal = Parameter.agent_dishonest;
 		}
 		else if (ishonest==true){//defense
@@ -229,20 +232,21 @@ public class Buyer extends Agent{
 			bHonestVal = Parameter.agent_honest;
 
 		}
-		productid = chooseProduct(s1.getId());
-		salePrice = buyProduct(productid);
+		//productid = chooseProduct(s1);
+		//salePrice = buyProduct(productid);
 		Transaction t = new Transaction();
-		t.create(this, s1, productid, salePrice, currentRating, s1.getId());
+		t.create(this, s1, 1, 1, 1.0, day, 1.0, currentRating, s1);
 		sellersRated.add(s1);
-		productsPurchased.add(productid);
+		//productsPurchased.add(productid);
 		trans.add(t);
-		sVal = s1.getId();
+		sVal = s1;
 
 		//*****	double sHonestVal = ecommerce.getSellersTrueRating(sVal);	
 		//add instance, update the array in e-commerce
 		dVal = day + 1;
 		bVal = this.getId();
 		Instance inst = null;
+               // this.addInstance(new Instance(inst));
 		//*****		Instance inst = new Instance(transactions.numAttributes());
 		//******		inst.setDataset(transactions);
 		//*****		inst.setValue(Parameter.m_dayIdx, dVal);
@@ -251,7 +255,7 @@ public class Buyer extends Agent{
 		//*****		inst.setValue(Parameter.m_sidIdx, "s" + Integer.toString(sVal));
 		//*****	inst.setValue(Parameter.m_sHonestIdx, sHonestVal);			
 		//*****		inst.setValue(Parameter.m_ratingIdx, rVal);	
-		return inst;
+		//return inst;
 	}
 
 	//----the below is used to build buyer's trust network of advisors-------------------------------

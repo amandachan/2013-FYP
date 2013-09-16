@@ -11,26 +11,65 @@ import agent.Seller;
 public class Transaction {
 
 	private Buyer buyer;
-	private Seller seller;
+	private int seller;
 	private int product;
 	private String time;
 	private double amountPaid;
 	private Rating rating;
+        private int day;
+        private int quantity;
+        private double price;
+        private String remarks;
+
+        public String getRemarks(){
+            return remarks;
+        }
+
+        public void setRemarks(String remarks){
+            this.remarks = remarks;
+        }
+
+        public double getPrice(){
+            return price;
+        }
+
+        public void setPrice(double price){
+            this.price = price;
+        }
+
+        public int getQuantity(){
+            return quantity;
+        }
+
+        public void setQuantity(int quantity){
+            this.quantity=quantity;
+        }
+
+        public int getDay(){
+            return day;
+        }
+
+        public void setDay(int day){
+            this.day = day;
+        }
 	
 	public Transaction(){
 
 	}
 	
-	public void create(Buyer buyer, Seller seller, int product, double amountPaid, double value, int cid){
+	public void create(Buyer buyer, int seller, int product, int quantity, double price, int day, double amountPaid, double value, int cid){
 		this.buyer = buyer;
 		this.seller = seller;
 		this.product = product;
-		this.amountPaid = amountPaid;
+		this.amountPaid = quantity * price;
+                this.price = price;
+                this.day = day;
     	Calendar cal = Calendar.getInstance();
     	cal.getTime();
     	SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
     	time = sdf.format(cal.getTime());
     	this.rating = new Rating();
+        System.out.println("seller" + seller + "buyer" + buyer + "valur" + value + "cid" + cid);
     	rating.create(seller, buyer, value, cid);
 	}
 	
@@ -47,7 +86,7 @@ public class Transaction {
 		return buyer;
 	}
 
-	public Seller getSeller() {
+	public int getSeller() {
 		return seller;
 	}
 
@@ -58,6 +97,10 @@ public class Transaction {
 	public double getAmountPaid() {
 		return amountPaid;
 	}
+
+        public void setAmountPaid(){
+            this.amountPaid = getQuantity() * getPrice();
+        }
 
 	public Rating getRating() {
 		return rating;

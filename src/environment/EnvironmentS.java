@@ -29,10 +29,17 @@ public class EnvironmentS extends Environment{
 
        public void eCommerceSetting(String attackName,String defenseName){
 
+           System.out.println("enters eCommerce");
 
            parameterSetting(attackName, defenseName);
-           generateInstances();
-
+       //    generateInstances();
+         try{
+           agentSetting(attackName,defenseName);
+         }
+         catch(Exception e){
+             
+         }
+           assignTruth();
            /*if(Parameter.includeICLUB(defenseName)){
             if (Parameter.RATING_TYPE.equalsIgnoreCase("binary")) {
                 commerce.parameterSetting(attackName, defenseName);
@@ -59,10 +66,15 @@ public class EnvironmentS extends Environment{
     }
        public Instances generateInstances(){
 
+           System.out.println("enters generateInstances");
            //initialize the header information of instances
-        Instances header = initialInstancesHeader();
+       Instances header = initialInstancesHeader();
         m_Transactions = new Instances(header); //protected variable declared under Environment class.
-        assignTruth();
+
+       //remove the above comment lines later...WE NEED the statements
+       // dont remove statements
+
+        //   assignTruth();
 
         //initialize the double array;
         //m_BSR = new int[m_NumBuyers][m_NumSellers][2];

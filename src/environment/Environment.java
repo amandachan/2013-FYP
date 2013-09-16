@@ -45,30 +45,42 @@ public abstract class Environment {
 
     protected HashMap<Seller,Double> m_SellersTrueRep;
 
-    protected int m_Day;
+    protected int Day;
     //[day][all seller] sales
     //protected int[][] m_DailySales = null;
 
 
-    protected HashMap<Seller,Integer> m_DailySales = new HashMap();
+
+  //  protected HashMap<Seller,Integer> Seller_sales = new HashMap();
+  //  protected HashMap<Seller,Integer> Seller_day = new HashMap();
 
     //[day][target dishonest/honest seller]: (|real reputation - predict reputation|)
     //protected double[][] m_DailyRep = null;
-    protected HashMap<Seller,Double> m_DailyRep = new HashMap(); // based on the targeted honest/dishonest seller???
+  //  protected HashMap<Seller,Double> m_DailyRep = new HashMap(); // based on the targeted honest/dishonest seller???
     //protected double[][] m_DailyRepDiff = null;
-    protected HashMap<Seller,Double> m_DailyRepDiff = new HashMap();
+  //  protected HashMap<Seller,Double> m_DailyRepDiff = new HashMap();
     //protected double[][] m_DailyMCC = null;
-    protected HashMap<Seller,Double> m_DailyMCC = new HashMap();
+  //  protected HashMap<Seller,Double> m_DailyMCC = new HashMap();
 
         protected Environment(){           // default constructor
             buyerList = new ArrayList();
             sellerList = new ArrayList();
             transactionList = new ArrayList();
-        }
+
+        m_SellersTrueRating = new HashMap();
+        m_SellersTrueRep = new HashMap();
+        Day =0;
+         }
         Environment(ArrayList<Buyer> buyerList,ArrayList<Seller> sellerList, ArrayList<Transaction> transactionList){
             this.buyerList = buyerList;
             this.sellerList = sellerList;               // maybe from the setUpEnvironment() under CentralAuthority
             this.transactionList = transactionList;     //or else we can invoke each of the set methods below to initialize
+        }
+        public void setDay(int day){
+            this.Day = day;
+        }
+        public int getDay(){
+            return this.Day;
         }
 
         protected void parameterSetting(String attackName, String defenseName){
@@ -92,11 +104,11 @@ public abstract class Environment {
         //    m_SellersTrueRating = new double[m_NumSellers];
     //   m_SellersTrueRep = new double[m_NumSellers];
 
-        m_SellersTrueRating = new HashMap();
-        m_SellersTrueRep = new HashMap();
+   //     m_SellersTrueRating = new HashMap();
+   //     m_SellersTrueRep = new HashMap();
 
         //statistic of results
-        m_Day = 0;
+         Day = 0;
     //    m_DailySales = new int[m_Numdays + 1][m_NumSellers];
 
     //     m_DailyRep = new double[m_Numdays + 1][2];         NO NEED TO INTIALIZE SINCE WE ARE
@@ -105,7 +117,9 @@ public abstract class Environment {
 
           m_AttackName = new String(attackName);
           m_DefenseName = new String(defenseName);
-    } // parameterSetting()
+
+        System.out.println("entered environment");
+        } // parameterSetting()
 
             public Instances initialInstancesHeader(){
 
@@ -175,6 +189,9 @@ public abstract class Environment {
 
         public void assignTruth(){
 
+
+         System.out.println("enters assign truth");
+         System.out.println("is seller list empty?  "+this.sellerList.isEmpty());
         //assign the true rating for sellers
         if(Parameter.RATING_TYPE.compareTo("binary") == 0){
           for(int i = 0; i < Parameter.NO_OF_DISHONEST_SELLERS; i++){
@@ -268,28 +285,33 @@ public abstract class Environment {
         }
     } // assignTruth()
 
-        private void agentSetting(String attackName, String defenseName) throws ClassNotFoundException, NoSuchMethodException, SecurityException{
+        public void agentSetting(String attackName, String defenseName) throws ClassNotFoundException, NoSuchMethodException, SecurityException{
+
+        System.out.println("enters agent Setting");
 
         int numBuyers = Parameter.NO_OF_DISHONEST_BUYERS + Parameter.NO_OF_HONEST_BUYERS;
-        int numSellers = getSellerListSize();
+        int numSellers = Parameter.NO_OF_DISHONEST_SELLERS+Parameter.NO_OF_HONEST_SELLERS;
+       // int numSellers = getSellerListSize();
 
         //m_buyers = new Buyer[numBuyers];  do we need this??? We are using arraylists.
         //m_sellers = new Seller[numSellers];
 
         for(int i = 0; i < numBuyers; i++){
             int bid = i;
-            if(bid < Parameter.NO_OF_DISHONEST_BUYERS || bid >= numBuyers){
+            if(bid < Parameter.NO_OF_DISHONEST_BUYERS || bid <= numBuyers){
 
                 Buyer b = new Buyer();
-                b.setId(bid);b.setAttackName(attackName);
+                b.setId(bid);b.setAttackName(attackName);b.attackSetting(attackName);
                 b.setIshonest(false);
-
+              
+              //  b.setListOfSellers(sellerList);
                 buyerList.add(b);
+                  b.setListOfBuyers(buyerList);
                 //buyerList.add(new Buyer(bid,false,attackName));
                 //m_buyers[i] = new Buyer(bid, false, attackName, m_eCommerce);
-            } else{
+            } if(bid < Parameter.NO_OF_HONEST_BUYERS || bid <= numBuyers){
                 Buyer b = new Buyer();
-                b.setId(bid);b.setIshonest(true);b.setDefenseName(defenseName);
+                b.setId(bid);b.setIshonest(true);b.setDefenseName(defenseName);b.defenseSetting(defenseName);
                 buyerList.add(b);
                 //buyerList.add(new Buyer(bid,true,defenseName));
                 //m_buyers[i] = new Buyer(bid, true, defenseName, m_eCommerce);
@@ -339,7 +361,15 @@ public abstract class Environment {
             }
         }*/
 
+        System.out.println("seller list size "+sellerList.size());
     } //agentSetting
+       public String getDefenseName(){
+           return m_DefenseName;
+       }
+
+       public Environment getEnvironment(){
+           return this;
+       }
 
 
         public void AddBuyerToList(Buyer buyer){   //dynamic way of adding a buyer to the list
@@ -379,7 +409,7 @@ public abstract class Environment {
             return transactionList;
         }
 
-        abstract void eCommerceSetting(String attackName,String defenseName);
+       public abstract void eCommerceSetting(String attackName,String defenseName);
         abstract Instances generateInstances();
 
 	abstract void importConfigSettings();

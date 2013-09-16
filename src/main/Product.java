@@ -10,7 +10,9 @@ public class Product {
 	private HashMap<Integer, ArrayList<Integer>> productid = new HashMap<Integer, ArrayList<Integer>>();
 	//key is product id, value is sale price
 	private HashMap<Integer, Double> saleprice = new HashMap<Integer, Double>();
-
+//Product(){
+ ///   productid.put(1, null)
+//}
 
 	public int getProduct(int sellerid){
 		//get list of products sold by the seller

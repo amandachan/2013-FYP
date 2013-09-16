@@ -8,10 +8,10 @@ import weka.core.Instances;
 import main.Account;
 import main.Transaction;
 
-import defenses.Defense;
-import environment.Environment;
+import defenses.*;
+import environment.*;
 
-import attacks.Attack;
+import attacks.*;
 
 
 public abstract class Agent {
@@ -25,14 +25,17 @@ public abstract class Agent {
 	protected ArrayList<Buyer> listOfBuyers = new ArrayList<Buyer>();
 	protected String defenseName = null;
 	protected String attackName = null;
-	protected Attack attackModel = null;
+	protected Attack attackModel;
 	protected Defense defenseModel = null;
 	//previously BSR[][][]. Transaction stores the buyer's rating to sellers also.
 	protected ArrayList<Transaction> trans = new ArrayList<Transaction>();
-	protected Account account;  
+	protected Account account;
+        protected double credits=0.0;
 	
 	public Agent() { 
-		account = new Account(); 
+		account = new Account();
+                attackModel = new AlwaysUnfair();
+                defenseModel = new BRS();
 		//*history = new Instances(ecommerce.getTransactions());
 	}
 	
@@ -40,6 +43,14 @@ public abstract class Agent {
 		this.listOfBuyers = buyers;
 		this.listOfSellers = sellers;
 	}
+
+        public double getCredits(){
+            return credits;
+        }
+
+        public void setCredits(double credits){
+            this.credits=credits;
+        }
 	
 	public int getId() {
 		return id;
@@ -76,7 +87,7 @@ public abstract class Agent {
 		return ecommerce;
 	}
 
-	public void setEcommerce(Environment ecommerce) {
+	public void setEcommerce(EnvironmentS ecommerce) {
 		this.ecommerce = ecommerce;
 	}
 

@@ -1,6 +1,6 @@
 package attacks;
 
-import environment.Environment;
+import environment.*;
 import agent.Seller;
 import weka.core.Instance;
 import main.Parameter;
@@ -11,7 +11,7 @@ public abstract class Attack {
 	protected int day;
 	protected Environment ecommerce;
 	public abstract double giveUnfairRating(Instance inst);
-	public abstract Seller chooseSeller();
+	public abstract int chooseSeller();
 
 
 	public Environment getEcommerce() {
