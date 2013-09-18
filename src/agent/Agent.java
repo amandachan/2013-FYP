@@ -36,6 +36,7 @@ public abstract class Agent {
 		account = new Account();
                 attackModel = new AlwaysUnfair();
                 defenseModel = new BRS();
+                
 		//*history = new Instances(ecommerce.getTransactions());
 	}
 	
@@ -165,6 +166,10 @@ public abstract class Agent {
 	
 	public Buyer getBuyer(int bid){
 		return listOfBuyers.get(bid);
+	}
+
+	public void setEcommerce(Environment ecommerce) {
+		this.ecommerce = ecommerce;
 	}
 	
 

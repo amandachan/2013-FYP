@@ -32,7 +32,7 @@ public class EnvironmentS extends Environment{
            System.out.println("enters eCommerce");
 
            parameterSetting(attackName, defenseName);
-       //    generateInstances();
+           generateInstances();
          try{
            agentSetting(attackName,defenseName);
          }
@@ -74,7 +74,7 @@ public class EnvironmentS extends Environment{
        //remove the above comment lines later...WE NEED the statements
        // dont remove statements
 
-        //   assignTruth();
+         // assignTruth();
 
         //initialize the double array;
         //m_BSR = new int[m_NumBuyers][m_NumSellers][2];

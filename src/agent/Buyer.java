@@ -25,7 +25,6 @@ import attacks.AlwaysUnfair;
 import attacks.Attack;
 
 public class Buyer extends Agent{
-
 	private boolean ishonest;
 	private ArrayList<Rating> ratingsToProducts;
 	private ArrayList<Integer> productsPurchased;
@@ -47,14 +46,16 @@ public class Buyer extends Agent{
 
 
 	public Buyer (int id){
+		//history = new Instances(ecommerce.getM_Transactions());
 
 		//System.out.println("SIZE OF LIST" + trusts.size());
 		this.id = id;
-		
+
 	}
 
 	public Buyer(){
 		//System.out.println("SIZE OF LIST" + trusts.size());
+		//	history = new Instances(ecommerce.getM_Transactions());
 
 	}
 
@@ -81,7 +82,7 @@ public class Buyer extends Agent{
 	public void setProductsPurchased(ArrayList<Integer> productsPurchased) {
 		this.productsPurchased = productsPurchased;
 	}
-	
+
 	public ArrayList<Transaction> getBuyerTransactions(){
 		ArrayList<Transaction> buyerTransactions = null;
 		return buyerTransactions;
@@ -104,6 +105,7 @@ public class Buyer extends Agent{
 					currentRating = attackModel.giveUnfairRating(inst);
 				} else {
 					defenseModel.giveFairRating(inst);
+
 				}				
 
 				//update sellers' history
@@ -144,7 +146,7 @@ public class Buyer extends Agent{
 
 	//set defense model
 	public Defense defenseSetting(String defenseName) throws ClassNotFoundException, NoSuchMethodException, SecurityException{
-		 defenseModel=  new BRS();
+		defenseModel=  new BRS();
 		try{
 			Class class1 = Class.forName("defenses."+defenseName.trim());
 			Constructor cons = class1.getDeclaredConstructor();
@@ -170,7 +172,7 @@ public class Buyer extends Agent{
 		//*defenseModel.seteCommerce(m_eCommerce);
 		return defenseModel;
 	}
-	
+
 	//choose whether to perform attack or defense depending on buyer's honesty
 	public void chooseModel(String modelName) throws ClassNotFoundException, NoSuchMethodException, SecurityException{
 		if(ishonest == false){
@@ -186,17 +188,17 @@ public class Buyer extends Agent{
 
 	//randomly choose product that is sold by the chosen seller
 	public int chooseProduct(int sellerid){
-		 Random randomGenerator = new Random();
+		Random randomGenerator = new Random();
 
 		//get hashmap of seller id & product id
 		HashMap<Integer, ArrayList<Integer>> prodList = new HashMap<Integer, ArrayList<Integer>>();
 		Product p = new Product();
 		prodList = p.getProductid();
-		
+
 		//get list of products sold by the seller
 		ArrayList<Integer> prodid = new ArrayList<Integer>();
 		prodid = prodList.get(sellerid);
-		
+
 		//randomly select product from list of products
 		int pid = randomGenerator.nextInt(prodid.size());
 		return pid;
@@ -210,26 +212,26 @@ public class Buyer extends Agent{
 		HashMap<Integer, Double> priceList = new HashMap<Integer, Double>();
 		Product p = new Product();
 		priceList = p.getSaleprice();
-		
+
 		//get price of product
 		double price = priceList.get(productid);
 		return price;
 	}
-	
+
 	//create transaction that includes buyer, seller and product
-	public void addTransaction(int day){
+	public Instance addTransaction(int day){
 		//System.out.println("enters addTransaction");
-             //  Seller s1=new Seller();
-                this.day = day;
-		//*****	Instances transactions = ecommerce.getTransactions();
+		//  Seller s1=new Seller();
+		this.day = day;
+		Instances transactions = ecommerce.getM_Transactions();
 		double rVal = Parameter.nullRating();
 		int dVal, bVal, sVal, productid, s1=0;
 		double salePrice;
-		String bHonestVal;
+		String bHonestVal = null;
 		if (ishonest==false){ //attack
 			//select seller and product, then create transaction
-		 //System.out.println("enters ishonest check");
-                     s1 = attackModel.chooseSeller();
+			//System.out.println("enters ishonest check");
+			s1 = attackModel.chooseSeller();
 			bHonestVal = Parameter.agent_dishonest;
 		}
 		else if (ishonest==true){//defense
@@ -240,32 +242,31 @@ public class Buyer extends Agent{
 		//productid = chooseProduct(s1);
 		//salePrice = buyProduct(productid);
 		Transaction t = new Transaction();
-rateSeller(day);
+		rateSeller(day);
 		t.create(this, s1, 1, 1, 1.0, day, 1.0, currentRating, s1);
 		sellersRated.add(s1);
 		//productsPurchased.add(productid);
 		trans.add(t);
 		sVal = s1;
 
-		//*****	double sHonestVal = ecommerce.getSellersTrueRating(sVal);	
+		double sHonestVal = ecommerce.getM_SellersTrueRating().get(sVal);	
 		//add instance, update the array in e-commerce
 		dVal = day + 1;
 		bVal = this.getId();
-		Instance inst = null;
-               // this.addInstance(new Instance(inst));
-		//*****		Instance inst = new Instance(transactions.numAttributes());
-		//******		inst.setDataset(transactions);
-		//*****		inst.setValue(Parameter.m_dayIdx, dVal);
-		//*****		inst.setValue(Parameter.m_bidIdx, "b" + Integer.toString(bVal)); 
-		//*****		inst.setValue(Parameter.m_bHonestIdx, bHonestVal);
-		//*****		inst.setValue(Parameter.m_sidIdx, "s" + Integer.toString(sVal));
-		//*****	inst.setValue(Parameter.m_sHonestIdx, sHonestVal);			
-		//*****		inst.setValue(Parameter.m_ratingIdx, rVal);	
-		//return inst;
+		Instance inst = new Instance(transactions.numAttributes());
+		this.addInstance(new Instance(inst));
+		inst.setDataset(transactions);
+		inst.setValue(Parameter.m_dayIdx, dVal);
+		inst.setValue(Parameter.m_bidIdx, "b" + Integer.toString(bVal)); 
+		inst.setValue(Parameter.m_bHonestIdx, bHonestVal);
+		inst.setValue(Parameter.m_sidIdx, "s" + Integer.toString(sVal));
+		inst.setValue(Parameter.m_sHonestIdx, sHonestVal);			
+		inst.setValue(Parameter.m_ratingIdx, rVal);	
+		return inst;
 	}
 
 	//----the below is used to build buyer's trust network of advisors-------------------------------
-	
+
 	public void calculateAverageTrusts(int sid){
 		int index = 0; //only 0/1, means dishonest/honest duopoly seller
 		if(sid == Parameter.TARGET_HONEST_SELLER){

@@ -24,7 +24,7 @@ public abstract class Attack {
 	//inverse the rating to make it unfair rating
 	public double complementRating(int sid){
 
-		double trueRating=0; //*****= ecommerce.getSellersTrueRating(sid);
+		double trueRating= ecommerce.getM_SellersTrueRating().get(sid);
 		double cRating = 1.0;
 		if(Parameter.RATING_TYPE.equalsIgnoreCase("binary")){
 			cRating = -trueRating;

@@ -143,7 +143,7 @@ public class BRS extends Defense{
 			//System.out.println("LOOP" + aid);
 			if (aid == b.getId())continue;  //ignore its own rating
 			if (trustAdvisors.get(aid) == false)continue;	//no transaction with seller
-			//System.out.println("buyer12345" + b.getListOfBuyers().size());
+			System.out.println("buyer12345" + b.getListOfBuyers().size());
 			for(int i=0; i<b.getListOfBuyers().get(aid).getTrans().size(); i++){
 				if(b.getBuyer(aid).getTrans().get(i).getSeller()==sid && i==0){
 					bsr0 = BS_npSum.get(0) + b.getBuyer(aid).getTrans().get(0).getRating().getCriteriaRatings().get(0).getCriteriaRatingValue();
