@@ -9,7 +9,7 @@ public class Rating {
 
 	private ArrayList<Criteria> criteriaRatings;
 	private Buyer rater;
-	private int ratee;
+	private Seller ratee;
 	
 	public Rating(){
 	criteriaRatings = new ArrayList<Criteria>();
@@ -23,7 +23,7 @@ public class Rating {
 		this.criteriaRatings = criteriaRatings;
 	}
 
-	public void create(int sid, Buyer bid, double value, int id){
+	public void create(Seller sid, Buyer bid, double value, int id){
 		this.rater = bid;
 		this.ratee = sid;
 		Criteria c = new Criteria(value ,id);

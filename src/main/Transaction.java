@@ -11,7 +11,7 @@ import agent.Seller;
 public class Transaction {
 
 	private Buyer buyer;
-	private int seller;
+	private Seller seller;
 	private int product;
 	private String time;
 	private double amountPaid;
@@ -57,7 +57,7 @@ public class Transaction {
 
 	}
 	
-	public void create(Buyer buyer, int seller, int product, int quantity, double price, int day, double amountPaid, double value, int cid){
+	public void create(Buyer buyer, Seller seller, int product, int quantity, double price, int day, double amountPaid, double value, int cid){
 		this.buyer = buyer;
 		this.seller = seller;
 		this.product = product;
@@ -69,7 +69,6 @@ public class Transaction {
     	SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
     	time = sdf.format(cal.getTime());
     	this.rating = new Rating();
-        System.out.println("seller" + seller + "buyer" + buyer + "valur" + value + "cid" + cid);
     	rating.create(seller, buyer, value, cid);
 	}
 	
@@ -86,7 +85,7 @@ public class Transaction {
 		return buyer;
 	}
 
-	public int getSeller() {
+	public Seller getSeller() {
 		return seller;
 	}
 

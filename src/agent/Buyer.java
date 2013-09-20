@@ -28,7 +28,7 @@ public class Buyer extends Agent{
 	private boolean ishonest;
 	private ArrayList<Rating> ratingsToProducts;
 	private ArrayList<Integer> productsPurchased;
-	private ArrayList<Integer> sellersRated = new ArrayList<Integer>();
+	private ArrayList<Seller> sellersRated = new ArrayList<Seller>();
 
 	//buyer's current rating (the most recent rating made by the buyer)
 	private double currentRating;
@@ -46,17 +46,12 @@ public class Buyer extends Agent{
 
 
 	public Buyer (int id){
-		//history = new Instances(ecommerce.getM_Transactions());
-
-		//System.out.println("SIZE OF LIST" + trusts.size());
+		
 		this.id = id;
 
 	}
 
 	public Buyer(){
-		//System.out.println("SIZE OF LIST" + trusts.size());
-		//	history = new Instances(ecommerce.getM_Transactions());
-
 	}
 
 	public boolean isIshonest() {
@@ -102,8 +97,10 @@ public class Buyer extends Agent{
 				// only complete the current day transaction
 				if (dVal != this.day)continue;				
 				if (this.ishonest == false) {
+					attackModel.setEcommerce(ecommerce);
 					currentRating = attackModel.giveUnfairRating(inst);
 				} else {
+					defenseModel.seteCommerce(ecommerce);
 					defenseModel.giveFairRating(inst);
 
 				}				
@@ -140,7 +137,7 @@ public class Buyer extends Agent{
 			ex.printStackTrace();
 		}
 		//set the eCommerce
-		//*attackModel.seteCommerce(m_eCommerce);
+		attackModel.setEcommerce(ecommerce);
 		return attackModel;
 	}
 
@@ -169,7 +166,7 @@ public class Buyer extends Agent{
 			ex.printStackTrace();
 		}
 		// set the eCommerce
-		//*defenseModel.seteCommerce(m_eCommerce);
+		defenseModel.seteCommerce(ecommerce);
 		return defenseModel;
 	}
 
@@ -220,18 +217,17 @@ public class Buyer extends Agent{
 
 	//create transaction that includes buyer, seller and product
 	public Instance addTransaction(int day){
-		//System.out.println("enters addTransaction");
-		//  Seller s1=new Seller();
 		this.day = day;
 		Instances transactions = ecommerce.getM_Transactions();
 		double rVal = Parameter.nullRating();
-		int dVal, bVal, sVal, productid, s1=0;
+		int dVal, bVal, sVal, productid; 
+		Seller s1 = null;
 		double salePrice;
 		String bHonestVal = null;
 		if (ishonest==false){ //attack
 			//select seller and product, then create transaction
-			//System.out.println("enters ishonest check");
-			s1 = attackModel.chooseSeller();
+
+			s1 = attackModel.chooseSeller(this);
 			bHonestVal = Parameter.agent_dishonest;
 		}
 		else if (ishonest==true){//defense
@@ -243,18 +239,18 @@ public class Buyer extends Agent{
 		//salePrice = buyProduct(productid);
 		Transaction t = new Transaction();
 		rateSeller(day);
-		t.create(this, s1, 1, 1, 1.0, day, 1.0, currentRating, s1);
+		t.create(this, s1, 1, 1, 1.0, day, 1.0, currentRating, s1.getId());
 		sellersRated.add(s1);
 		//productsPurchased.add(productid);
 		trans.add(t);
-		sVal = s1;
+		ecommerce.updateTransactionList(t);
+		sVal = s1.getId();
 
-		double sHonestVal = ecommerce.getM_SellersTrueRating().get(sVal);	
+		double sHonestVal = ecommerce.getSellersTrueRating(s1.getId());
 		//add instance, update the array in e-commerce
 		dVal = day + 1;
 		bVal = this.getId();
 		Instance inst = new Instance(transactions.numAttributes());
-		this.addInstance(new Instance(inst));
 		inst.setDataset(transactions);
 		inst.setValue(Parameter.m_dayIdx, dVal);
 		inst.setValue(Parameter.m_bidIdx, "b" + Integer.toString(bVal)); 
@@ -262,6 +258,9 @@ public class Buyer extends Agent{
 		inst.setValue(Parameter.m_sidIdx, "s" + Integer.toString(sVal));
 		inst.setValue(Parameter.m_sHonestIdx, sHonestVal);			
 		inst.setValue(Parameter.m_ratingIdx, rVal);	
+		this.addInstance(new Instance(inst));
+		
+		System.out.println("Seller ID: " + s1.getId() + " Buyer ID: " + this.getId() + " Rating: " + currentRating + " Day: " + day);
 		return inst;
 	}
 

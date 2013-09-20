@@ -26,6 +26,8 @@ public abstract class Agent {
 	protected String defenseName = null;
 	protected String attackName = null;
 	protected Attack attackModel;
+	
+
 	protected Defense defenseModel = null;
 	//previously BSR[][][]. Transaction stores the buyer's rating to sellers also.
 	protected ArrayList<Transaction> trans = new ArrayList<Transaction>();
@@ -37,7 +39,7 @@ public abstract class Agent {
                 attackModel = new AlwaysUnfair();
                 defenseModel = new BRS();
                 
-		//*history = new Instances(ecommerce.getTransactions());
+		//history = new Instances(ecommerce.getM_Transactions());
 	}
 	
 	public void setGlobalInformation(ArrayList<Seller> sellers, ArrayList<Buyer> buyers){
@@ -170,6 +172,7 @@ public abstract class Agent {
 
 	public void setEcommerce(Environment ecommerce) {
 		this.ecommerce = ecommerce;
+		history = new Instances(ecommerce.getM_Transactions());
 	}
 	
 

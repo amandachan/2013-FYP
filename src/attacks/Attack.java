@@ -1,6 +1,7 @@
 package attacks;
 
 import environment.*;
+import agent.Buyer;
 import agent.Seller;
 import weka.core.Instance;
 import main.Parameter;
@@ -9,9 +10,9 @@ import main.Rating;
 
 public abstract class Attack {
 	protected int day;
-	protected Environment ecommerce;
+	protected Environment ecommerce = null;
 	public abstract double giveUnfairRating(Instance inst);
-	public abstract int chooseSeller();
+	public abstract Seller chooseSeller(Buyer b);
 
 
 	public Environment getEcommerce() {
@@ -23,8 +24,7 @@ public abstract class Attack {
 	
 	//inverse the rating to make it unfair rating
 	public double complementRating(int sid){
-
-		double trueRating= ecommerce.getM_SellersTrueRating().get(sid);
+		double trueRating= ecommerce.getSellersTrueRating(sid);
 		double cRating = 1.0;
 		if(Parameter.RATING_TYPE.equalsIgnoreCase("binary")){
 			cRating = -trueRating;

@@ -18,9 +18,9 @@ import java.lang.*;
 
 public abstract class Environment {
 
-	private ArrayList<Buyer> buyerList;
-	private ArrayList<Seller> sellerList;
-	private ArrayList<Transaction> transactionList;
+	protected ArrayList<Buyer> buyerList;
+	protected ArrayList<Seller> sellerList;
+	protected ArrayList<Transaction> transactionList;
 
 
 	protected int m_NumAtts = 6;                        //[ day, buyer_id, buyer_is_honest, seller_id, seller_is_honest, rating]
@@ -70,9 +70,10 @@ public abstract class Environment {
 		m_SellersTrueRating = new HashMap<Seller, Double>();
 		m_SellersTrueRep = new HashMap<Seller, Double>();
 		Day =0;
+
 	}
-	
-	
+
+
 	public HashMap<Seller, Double> getM_SellersTrueRating() {
 		return m_SellersTrueRating;
 	}
@@ -96,7 +97,6 @@ public abstract class Environment {
 	}
 
 	protected void parameterSetting(String attackName, String defenseName){
-
 		//set the number of dishonest/honest buyers
 		int db = Parameter.NO_OF_DISHONEST_BUYERS;
 		int hb = Parameter.NO_OF_HONEST_BUYERS;
@@ -151,11 +151,11 @@ public abstract class Environment {
 				attBuyer.addElement(str);
 			}
 		}else{*/
-			for(int i = 0; i < m_NumBuyers; i++){
-				String str = "b" + Integer.toString(i);
-				attBuyer.addElement(str);
-			}
-		
+		for(int i = 0; i < m_NumBuyers; i++){
+			String str = "b" + Integer.toString(i);
+			attBuyer.addElement(str);
+		}
+
 		attInfo.addElement(new Attribute(Parameter.buyerIdString, attBuyer));
 
 		//for buyer/advisor dishonest/honest
@@ -219,7 +219,7 @@ public abstract class Environment {
 			for(int i = Parameter.NO_OF_DISHONEST_SELLERS; i < m_NumSellers; i++){
 				m_SellersTrueRating.put(this.sellerList.get(i),1.0);
 			}
-
+			System.out.println("SIZEEE" + m_SellersTrueRating.size());
 			/*  for(int i = Parameter.NO_OF_DISHONEST_SELLERS; i < m_NumSellers; i++){   COMMENTED BY NEEL
                 //honest seller, rating = 1
                 m_SellersTrueRating[i] = Parameter.RATING_BINARY[2];
@@ -303,42 +303,30 @@ public abstract class Environment {
 
 		int numBuyers = Parameter.NO_OF_DISHONEST_BUYERS + Parameter.NO_OF_HONEST_BUYERS;
 		int numSellers = Parameter.NO_OF_DISHONEST_SELLERS+Parameter.NO_OF_HONEST_SELLERS;
-		// int numSellers = getSellerListSize();
 
-		for(int d=0; d<numBuyers; d++){
-			Buyer b = new Buyer();
-			buyerList.add(b );
-		}
-		for(int e=0; e<numSellers; e++){
-			Seller s = new Seller();
-
-			sellerList.add(s);
-		}
-	//	System.out.println(sellerList.size());
-		//m_buyers = new Buyer[numBuyers];  do we need this??? We are using arraylists.
-		//m_sellers = new Seller[numSellers];
-
-		for(int i = 0; i < numBuyers; i++){
-			int bid = i;
-			if(bid < Parameter.NO_OF_DISHONEST_BUYERS || bid >= numBuyers){
-
+		int bid=0;
+		for(int p = 0; p < numBuyers; p++){
+			bid = p; 
+			if(bid < 30){
+				//int id, boolean ishonest, String attackName, String defenseName, Environment ecommerce
 				Buyer b = new Buyer();
-				b.setId(bid);b.setAttackName(attackName);b.attackSetting(attackName);
-				b.setIshonest(false); b.setEcommerce(this);
+				System.out.println(Parameter.NO_OF_DISHONEST_BUYERS);
 
-				//  b.setListOfSellers(sellerList);
+				b.setId(bid);				
+				b.setAttackName(attackName);
+				b.attackSetting(attackName);
+				b.setIshonest(false); 
+				b.setEcommerce(this);
 				buyerList.add(b);
-				//   System.out.println("SIZE" + buyerList.size());
-				//buyerList.add(new Buyer(bid,false,attackName));
-				//m_buyers[i] = new Buyer(bid, false, attackName, m_eCommerce);
-			} if(bid < Parameter.NO_OF_HONEST_BUYERS || bid <= numBuyers){
+
+			}
+			else{
 				Buyer b = new Buyer();
 				b.setId(bid);b.setIshonest(true);b.setDefenseName(defenseName);b.defenseSetting(defenseName);
-				buyerList.add(b);b.setEcommerce(this);
-				//buyerList.add(new Buyer(bid,true,defenseName));
-				//m_buyers[i] = new Buyer(bid, true, defenseName, m_eCommerce);
-			}
+				b.setEcommerce(this);
+				buyerList.add(b);
 
+			}
 		}
 
 
@@ -348,16 +336,16 @@ public abstract class Environment {
 
 				Seller s = new Seller();
 				s.setId(sid);s.setIshonest(false);
-				sellerList.add(s);s.setEcommerce(this);
-				//sellerList.add(new Seller(bid,false));
-				// m_sellers[k] = new Seller(sid, false, m_eCommerce);
+				s.setEcommerce(this);
+				sellerList.add(s);
+
 			} else{
 
 				Seller s = new Seller();
 				s.setId(sid);s.setIshonest(true);
-				sellerList.add(s);s.setEcommerce(this);
-				// sellerList.add(new Seller(bid,true));
-				//m_sellers[k] = new Seller(sid, true, m_eCommerce);
+				s.setEcommerce(this);
+				sellerList.add(s);
+
 			}
 		}
 		for(int i=0; i<numBuyers; i++){
@@ -368,31 +356,9 @@ public abstract class Environment {
 			sellerList.get(i).setListOfBuyers(buyerList);
 			sellerList.get(i).setListOfSellers(sellerList);
 		}
-		//set up the global information for buyers;
-		//  for(int i = 0; i < numBuyers; i++){           DO WE NEED THIS?????
-		//      m_buyers[i].setGlobalInformation(m_buyers, m_sellers);
-		//  }
-
-		//for the evolutionary algorithm
-		/* if(Parameter.includeEA(m_defenseName) || Parameter.includeWMA(m_defenseName)){
-            int tnType = 1;
-            if(m_defenseName.equalsIgnoreCase("ea0")){
-                tnType = 0;
-            } else if(m_defenseName.equalsIgnoreCase("ea1")){
-                tnType = 1;
-            } else if(m_defenseName.equalsIgnoreCase("ea2")){
-                tnType = 2;
-            }
-            for(int i = 0; i < numBuyers; i++){
-                m_buyers[i].InitialTrustNetwork(tnType);
-            }
-            for(int i = 0; i < numBuyers; i++){
-                int day = 0;
-                m_buyers[i].resetWitness(day);
-            }
-        }*/
 
 	} //agentSetting
+
 	public String getDefenseName(){
 		return m_DefenseName;
 	}
@@ -439,8 +405,6 @@ public abstract class Environment {
 		return transactionList;
 	}
 
-
-
 	public Instances getM_Transactions() {
 		return m_Transactions;
 	}
@@ -453,6 +417,32 @@ public abstract class Environment {
 	abstract void importConfigSettings();
 	abstract void createEnvironment();
 	abstract void saveWekaInstances();
+	
+	
+	//--- added by Amanda, needed for buyer class -------------
+	//to get true rating of seller from hashmap
+	public double getSellersTrueRating(int s1){
+		for ( Seller key : m_SellersTrueRating.keySet() ) {
+			if(key.getId() == s1){
+				return m_SellersTrueRating.get(key);
+			}
+		}
+		return 0;
+	}
 
+	//for MAE calculation
+	public double getSellersTrueRep(int s1){
+		for ( Seller key : m_SellersTrueRep.keySet() ) {
+			if(key.getId() == s1){
+				return m_SellersTrueRep.get(key);
+			}
+		}
+		return 0;
+	}
+	
+	public void updateTransactionList(Transaction t){
+		transactionList.add(t);
+	}
+	
 }//class
 

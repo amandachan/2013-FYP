@@ -8,6 +8,7 @@ import environment.*;
 
 import main.Product;
 import main.Rating;
+import main.Transaction;
 import agent.Agent;
 import agent.Buyer;
 import agent.Seller;
@@ -26,27 +27,27 @@ public abstract class Defense {
 	protected int totalBuyers = dhBuyer + hBuyer;
 	protected int totalSellers = dhSeller + hSeller;
 	protected int m_NumInstances;	
-	
+
 	//protected int[][][] BSR;   		// to store the [buyer][seller][binary rating -1, 1]
 	protected ArrayList<Double> trustOfAdvisors = new ArrayList<Double>(); 
 	// store the trustworthiness of advisors;
 	// for statistic features
 	protected ArrayList<Double> rtimes = new ArrayList<Double>();
-	
+
 	//repuation for seller based on all buyer
-	public abstract void calculateReputation1(Buyer buyer1, int sid);
+	public abstract void calculateReputation1(Buyer buyer1, Seller sid);
 	//reputation for seller based on one buyer
-	public abstract void calculateReputation2(Buyer buyer, int sid);
+	public abstract void calculateReputation2(Buyer buyer, Seller sid);
 	//public abstract Rating calculateReputation3(int b, int p);
-	public abstract double calculateTrust(int seller, Buyer honestBuyer);
-	public abstract int chooseSeller(Buyer b);
-	
-	
+	public abstract double calculateTrust(Seller seller, Buyer honestBuyer);
+	public abstract Seller chooseSeller(Buyer b);
+
+
 	public void seteCommerce(Environment ec){
 		ecommerce = ec; 
-		
+
 	}
-	
+
 	//perform the defense model
 	public double giveFairRating(Instance inst){
 		// step 1: insert rating from honest buyer		
@@ -56,18 +57,18 @@ public abstract class Defense {
 			System.out.println("error, must be honest buyer");
 		}
 		int sVal = (int)(inst.value(Parameter.m_sidIdx));
-		double fairRating = 0; //*****ecommerce.getSellersTrueRating(sVal);
+		double fairRating = 0; ecommerce.getSellersTrueRating(sVal);
 		// add the rating to instances
 		inst.setValue(Parameter.m_ratingIdx, fairRating);	
-		
+
 		//update the eCommerce information
-//*****		ecommerce.getTransactions().add(new Instance(inst));	
-//*****		ecommerce.updateArray(inst);
+		ecommerce.getM_Transactions().add(new Instance(inst));	
+		//ecommerce.(inst);
 		return fairRating;
 	}
-	
+
 	//----- to be moved to evaluation metrics in future --------------------------------------------------
-	
+
 	public double calculateMCCofAdvisorTrust(int sid) {
 		double MCC = 0.0;
 		double tp, fn, fp, tn;
@@ -89,7 +90,7 @@ public abstract class Defense {
 		}
 		return MCC;
 	}
-	
+
 	private ArrayList<Integer> cofusionMatrix() {
 		// true positive, false negative, false positive, true negative,
 		ArrayList<Integer> cmVals = new ArrayList<Integer>();
@@ -122,4 +123,27 @@ public abstract class Defense {
 		}
 		return cmVals;
 	}
+	
+	
+	public double calculateMAEofSellerReputation(Buyer b, HashMap<Seller,Double>sellersTrueRep) {
+		 
+        double MAE = 0.0;
+       
+        for (int i = Parameter.NO_OF_DISHONEST_BUYERS; i < totalBuyers; i++) {
+              //only honest buyers use trust models to predict the reputation of sellers;
+              int bid = i;
+              for(int j = 0; j < totalSellers; j++){
+                    int sid = j;                       
+                    double S_rep = 0.5;
+                    S_rep=ecommerce.getSellersTrueRep(sid);
+                    double S_repPredict = calculateTrust(b.getSeller(sid), b.getBuyer(bid));
+                   
+                    MAE += Math.abs(S_rep - S_repPredict);
+                    //System.out.println("MAE(bid " + bid + ", sid " + sid + ") = \t" +MAE);
+              }                
+        }
+        MAE /= (Parameter.NO_OF_HONEST_BUYERS * totalSellers);
+
+        return MAE;
+  }
 }

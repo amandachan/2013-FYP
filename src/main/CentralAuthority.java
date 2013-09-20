@@ -15,8 +15,8 @@ public class CentralAuthority {
 	private Environment env;
 	private String m_defenseName;
 	private String m_attackName;
-	private ArrayList<Buyer> m_buyers;
-	private ArrayList<Seller> m_sellers;
+	private ArrayList<Buyer> m_buyers = new ArrayList<Buyer>();
+	private ArrayList<Seller> m_sellers = new ArrayList<Seller>();
 
 	//sellers sales, reputation, reputation difference per day
 	//    private int[][] m_dailySales;
@@ -103,7 +103,6 @@ public class CentralAuthority {
 			long defensetimeStart = new Date().getTime();
 			defense(day);   
 			long defensetimeEnd = new Date().getTime();
-//System.out.println("DAYYYYY" + day);
 			//TODO how to store transaction
 			//    defenseTime_day[day] = (-defensetimeStart + defensetimeEnd) / 1000.0;
 			defenseTime_day.set(day,(-defensetimeStart + defensetimeEnd) / 1000.0 );
@@ -144,6 +143,8 @@ public class CentralAuthority {
                 m_buyers.get(bid).giveRating(day);
             }
         }*/
+		m_buyers = env.getBuyerList();
+//System.out.println(m_buyers.get(index))
 		for(int i = 0; i < numBuyers; i++){
 			int bid = i;
 			if(m_buyers.get(bid).isIshonest() == false){
