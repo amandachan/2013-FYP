@@ -71,7 +71,7 @@ public class CentralAuthority {
 
 		//Day 0 is the eve of Day 1 (only for agents' decision making), transactions start on Day 1             
 		for (int day = 0; day < Parameter.NO_OF_DAYS; day++){                                                   
-
+                    
 			if (day != 0){
 				for (int count = 0; count<m_buyers.size();count++){
 					m_buyers.get(count).setCredits(m_buyers.get(count).getCredits()+Parameter.CREDITS_PER_TURN);
@@ -126,9 +126,21 @@ public class CentralAuthority {
 				//                System.out.print("   |repDiff MAE|: " + m_dailyRepDiff[day][0] + "  " + m_dailyRepDiff[day][1]);
 				// System.out.println(" avgWeights: " + m_dailyAvgWeights[day][0] + "  " + m_dailyAvgWeights[day][1]);
 				System.out.println("avg. weights for dishonest: "+ dishonest_avgWt.get(day) +"  avg. weights for honest "+honest_avgWt.get(day));
-
+                              
 			}
-		}
+		/*HashMap<Seller,Double> maeComp = new HashMap();
+                for(int i=0;i<m_buyers.size();i++){
+                   maeComp = m_buyers.get(i).getMAEList();
+                  for(int j=0;j<m_sellers.size();j++){
+                   System.out.println("MAE of seller "+m_sellers.get(j) +" "+maeComp.get(m_sellers.get(j)));
+                  }
+
+                }*/
+ /* for(int i=0; i<m_buyers.size(); i++){
+                                    m_buyers.get(i).setDay(day+1);
+                                }*/
+                        
+                }
 
 		return transList;
 	}
@@ -150,7 +162,13 @@ public class CentralAuthority {
 			if(m_buyers.get(bid).isIshonest() == false){
 				// m_buyers.get(bid).perform_model(day);
 				m_buyers.get(bid).addTransaction(day);
-			}
+                             // try{
+                             //     env.createARFFfile();
+                             // }
+                             // catch(Exception e){}
+
+
+                        }
 		}
 	}
 
@@ -172,6 +190,10 @@ public class CentralAuthority {
 				m_buyers.get(bid).addTransaction(day);
 			}
 		}
+                m_buyers.get(0).calMAE(day);
+              /*    for(int i=0; i<m_buyers.size(); i++){
+                                    m_buyers.get(i).setDay(day+1);
+                                }*/
 	}
 
 	private void avgerWeights(int day){

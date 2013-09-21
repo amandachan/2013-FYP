@@ -15,7 +15,18 @@ public class Seller extends Agent{
 	private ArrayList<Buyer> buyersRated;
 	private ArrayList<Buyer> buyersRatedMe;
 	private Product product;
-	
+        public double mae;
+
+        public double getMAE(){
+            return mae;
+        }
+
+        public void setMAE(double mae){
+            this.mae = mae;
+        }
+
+      
+
 	public ArrayList<Rating> getRatingsToBuyers() {
 		return ratingsToBuyers;
 	}

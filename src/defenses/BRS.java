@@ -72,8 +72,8 @@ public class BRS extends Defense{
 					checkTrans=true;
 				}
 				if (checkTrans==false){
-					trustOfAdvisors.set(aid, 0.5);
-					trustAdvisors.set(aid, false);
+					trustOfAdvisors.add(aid, 0.5);
+					trustAdvisors.add(aid, false);
 				}
 			}
 
@@ -100,7 +100,7 @@ public class BRS extends Defense{
 			if (aid == bid)continue;  //ignore its own rating
 			if (trustAdvisors.get(aid)== false)continue; //buyer no transaction with seller
 			trustOfAdvisors.set(aid, 1.0);
-			//System.out.println("/ " );
+			
 
 			for(int f=0; f<honestBuyer.getBuyer(aid).getTrans().size(); f++){
 				//System.out.println("BSR0 " );

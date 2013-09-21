@@ -125,7 +125,7 @@ public abstract class Defense {
 	}
 	
 	
-	public double calculateMAEofSellerReputation(Buyer b, HashMap<Seller,Double>sellersTrueRep) {
+	public double calculateMAEofSellerReputation(Buyer b, HashMap<Seller,Double>sellersTrueRep,Environment ecommerce) {
 		 
         double MAE = 0.0;
        
@@ -134,16 +134,18 @@ public abstract class Defense {
               int bid = i;
               for(int j = 0; j < totalSellers; j++){
                     int sid = j;                       
-                    double S_rep = 0.5;
+                    double S_rep;
                     S_rep=ecommerce.getSellersTrueRep(sid);
+                 // System.out.println("test " + S_rep);
                     double S_repPredict = calculateTrust(b.getSeller(sid), b.getBuyer(bid));
                    
                     MAE += Math.abs(S_rep - S_repPredict);
-                    //System.out.println("MAE(bid " + bid + ", sid " + sid + ") = \t" +MAE);
+                   // System.out.println("MAE(bid " + bid + ", sid " + sid + ") = \t" +MAE);
               }                
         }
         MAE /= (Parameter.NO_OF_HONEST_BUYERS * totalSellers);
-
+        
+System.out.println("calculate mae " + MAE);
         return MAE;
   }
 }

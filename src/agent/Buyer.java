@@ -11,6 +11,7 @@ import java.util.Vector;
 
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.*;
 
 import main.Product;
 import main.Rating;
@@ -25,6 +26,10 @@ import attacks.AlwaysUnfair;
 import attacks.Attack;
 
 public class Buyer extends Agent{
+
+        public HashMap<Integer,Double> MAEList =new HashMap();
+
+
 	private boolean ishonest;
 	private ArrayList<Rating> ratingsToProducts;
 	private ArrayList<Integer> productsPurchased;
@@ -43,7 +48,7 @@ public class Buyer extends Agent{
 	private double[] bounds = {0.0, 1.0};
 	private double fitness;
 	private int TNtype = 1; //0/1/2 means honest trust network/noise/collusive
-
+        private boolean checkDay = false;
 
 	public Buyer (int id){
 		
@@ -89,7 +94,7 @@ public class Buyer extends Agent{
 
 	//give rating
 	public void rateSeller(int day){
-		this.day = day;
+	
 		if(this.day > 0){//scan all the history information,
 			for (int i = 0; i < history.numInstances(); i++) {
 				Instance inst = history.instance(i);
@@ -101,7 +106,7 @@ public class Buyer extends Agent{
 					currentRating = attackModel.giveUnfairRating(inst);
 				} else {
 					defenseModel.seteCommerce(ecommerce);
-					defenseModel.giveFairRating(inst);
+					currentRating = defenseModel.giveFairRating(inst);
 
 				}				
 
@@ -215,16 +220,23 @@ public class Buyer extends Agent{
 		return price;
 	}
 
+
+        public void calMAE(int day){
+           double mae = defenseModel.calculateMAEofSellerReputation(this,ecommerce.getSellersTrueRepMap(),ecommerce);
+           MAEList.put(day,mae);
+            
+                System.out.println("this.day " + this.day + "day " + day + " MAE " + mae);
+
+        }
+
 	//create transaction that includes buyer, seller and product
 	public Instance addTransaction(int day){
-		this.day = day;
-		Instances transactions = ecommerce.getM_Transactions();
-		double rVal = Parameter.nullRating();
-		int dVal, bVal, sVal, productid; 
-		Seller s1 = null;
-		double salePrice;
-		String bHonestVal = null;
-		if (ishonest==false){ //attack
+            this.day = ecommerce.getDay();
+            System.out.println("check day on addTran "+day);
+            int dVal, bVal, sVal=0, productid; double mae=0.0;
+            Seller s1 = null;
+            String bHonestVal = null;
+            		if (ishonest==false){ //attack
 			//select seller and product, then create transaction
 
 			s1 = attackModel.chooseSeller(this);
@@ -235,6 +247,23 @@ public class Buyer extends Agent{
 			bHonestVal = Parameter.agent_honest;
 
 		}
+            System.out.println("this.day " + this.day + "day " + day);
+
+          /* if (this.day != day){
+                mae = defenseModel.calculateMAEofSellerReputation(this,ecommerce.getSellersTrueRepMap(),ecommerce);
+                MAEList.put(ecommerce.getSellerList().get(sVal),mae);
+            this.day = day;
+                System.out.println("this.day " + this.day + "day " + day);
+              
+            }*/
+		this.day = day;
+		Instances transactions = ecommerce.getM_Transactions();
+		double rVal = Parameter.nullRating();
+		
+		
+		double salePrice;
+		
+
 		//productid = chooseProduct(s1);
 		//salePrice = buyProduct(productid);
 		Transaction t = new Transaction();
@@ -259,11 +288,23 @@ public class Buyer extends Agent{
 		inst.setValue(Parameter.m_sHonestIdx, sHonestVal);			
 		inst.setValue(Parameter.m_ratingIdx, rVal);	
 		this.addInstance(new Instance(inst));
-		
-		System.out.println("Seller ID: " + s1.getId() + " Buyer ID: " + this.getId() + " Rating: " + currentRating + " Day: " + day);
+
+                ecommerce.createData(dVal,Integer.toString(bVal),bHonestVal,Integer.toString(sVal),sHonestVal,rVal);
+               try{
+                ecommerce.createARFFfile();
+               }
+               catch(Exception e){}
+                //HashMap<Seller,Double> MAEList = new HashMap();
+
+
+                System.out.println("Seller ID: " + s1.getId() + " Buyer ID: " + this.getId() + " Rating: " + currentRating + " Day: " + day + " MAE " + mae);
 		return inst;
 	}
 
+        public HashMap getMAEList(){
+            return this.MAEList;
+        }
+        
 	//----the below is used to build buyer's trust network of advisors-------------------------------
 
 	public void calculateAverageTrusts(int sid){

@@ -49,7 +49,8 @@ public class AlwaysUnfair extends Attack{
 		inst.setValue(Parameter.m_ratingIdx, rVal);
 		
 		//update the eCommerce information
-		ecommerce.getM_Transactions().add(new Instance(inst));	
+                if (ecommerce.getM_Transactions()!= null)
+                    ecommerce.getM_Transactions().add(new Instance(inst));
 //		ecommerce.updateArray(inst);
 		return rVal;
 	}

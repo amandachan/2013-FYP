@@ -71,6 +71,7 @@ public class EnvironmentS extends Environment{
        Instances header = initialInstancesHeader();
         m_Transactions = new Instances(header); //protected variable declared under Environment class.
 
+        System.out.println(m_Transactions);
        //remove the above comment lines later...WE NEED the statements
        // dont remove statements
 
