@@ -221,18 +221,18 @@ public class Buyer extends Agent{
 	}
 
 
-        public void calMAE(int day){
+     /*   public void calMAE(int day){
            double mae = defenseModel.calculateMAEofSellerReputation(this,ecommerce.getSellersTrueRepMap(),ecommerce);
            MAEList.put(day,mae);
             
-                System.out.println("this.day " + this.day + "day " + day + " MAE " + mae);
+                System.out.println("Day " + this.day + " MAE " + mae);
 
-        }
+        }*/
 
 	//create transaction that includes buyer, seller and product
 	public Instance addTransaction(int day){
             this.day = ecommerce.getDay();
-            System.out.println("check day on addTran "+day);
+         //   System.out.println("check day on addTran "+day);
             int dVal, bVal, sVal=0, productid; double mae=0.0;
             Seller s1 = null;
             String bHonestVal = null;
@@ -243,11 +243,11 @@ public class Buyer extends Agent{
 			bHonestVal = Parameter.agent_dishonest;
 		}
 		else if (ishonest==true){//defense
-			s1 = defenseModel.chooseSeller(this);
+			s1 = defenseModel.chooseSeller(this, ecommerce);
 			bHonestVal = Parameter.agent_honest;
 
 		}
-            System.out.println("this.day " + this.day + "day " + day);
+           // System.out.println("this.day " + this.day + "day " + day);
 
           /* if (this.day != day){
                 mae = defenseModel.calculateMAEofSellerReputation(this,ecommerce.getSellersTrueRepMap(),ecommerce);
@@ -297,7 +297,7 @@ public class Buyer extends Agent{
                 //HashMap<Seller,Double> MAEList = new HashMap();
 
 
-                System.out.println("Seller ID: " + s1.getId() + " Buyer ID: " + this.getId() + " Rating: " + currentRating + " Day: " + day + " MAE " + mae);
+             //   System.out.println("Seller ID: " + s1.getId() + " Buyer ID: " + this.getId() + " Rating: " + currentRating + " Day: " + day + " MAE " + mae);
 		return inst;
 	}
 

@@ -5,6 +5,7 @@ import java.util.Vector;
 
 import distributions.BetaDistribution;
 import distributions.PseudoRandom;
+import environment.Environment;
 
 import main.Parameter;
 import main.Product;
@@ -22,7 +23,8 @@ public class BRS extends Defense{
 
 	private boolean iterative;
 
-	public Seller chooseSeller(Buyer honestBuyer) {
+	public Seller chooseSeller(Buyer honestBuyer, Environment ec) {
+		this.ecommerce = ec;
 		//System.out.println("in chooseseller method");
 		//calculate the trust values on target seller		
 		ArrayList<Double> trustValues = new ArrayList<Double>();
@@ -31,13 +33,18 @@ public class BRS extends Defense{
 		for (int k = 0; k < 2; k++) {				
 			int sid = Parameter.TARGET_DISHONEST_SELLER;
 			if (k == 1)sid = Parameter.TARGET_HONEST_SELLER;
-			trustValues.add(calculateTrust(honestBuyer.getSeller(sid),honestBuyer));
-			mccValues.add(calculateMCCofAdvisorTrust(sid));
+
+			trustValues.add(k,calculateTrust(honestBuyer.getSeller(sid),honestBuyer));
+
+
+			mccValues.add(k,calculateMCCofAdvisorTrust(sid));
+
 
 		}
 		//update the daily reputation difference
-	//	ecommerce.updateDailyReputationDiff(trustValues);
-		//ecommerce.updateDailyMCC(mccValues);
+
+		ecommerce.updateDailyReputationDiff(trustValues);
+		ecommerce.updateDailyMCC(mccValues);
 
 		//select seller with the maximum trust values from the two target sellers
 		int sellerid = Parameter.TARGET_DISHONEST_SELLER;
@@ -55,7 +62,7 @@ public class BRS extends Defense{
 	public double calculateTrust(Seller sid, Buyer honestBuyer){
 		int bid = honestBuyer.getId();
 		double rep_aBS = 0.5;
-		trustAdvisors = new ArrayList<Boolean>();
+
 
 		int aid =0;
 		//find buyers that have transaction with seller
@@ -72,7 +79,7 @@ public class BRS extends Defense{
 					checkTrans=true;
 				}
 				if (checkTrans==false){
-					trustOfAdvisors.add(aid, 0.5);
+					trustOfAdvisors.set(aid, 0.5);
 					trustAdvisors.add(aid, false);
 				}
 			}
@@ -89,9 +96,6 @@ public class BRS extends Defense{
 		ArrayList<Integer> storedAdvisors = honestBuyer.getAdvisors();
 		storedAdvisors.clear(); double bsr0=0; double bsr1=0;
 		ArrayList<Double> np_BAforS = new ArrayList<Double>(2);	
-		for(int i=0; i<totalBuyers; i++){
-			trustOfAdvisors.add(i, 0.0);
-		}
 		for(int i=0; i<2; i++){
 			np_BAforS.add(i, 0.0);
 		}
@@ -99,8 +103,8 @@ public class BRS extends Defense{
 			aid = n;
 			if (aid == bid)continue;  //ignore its own rating
 			if (trustAdvisors.get(aid)== false)continue; //buyer no transaction with seller
-			trustOfAdvisors.set(aid, 1.0);
-			
+
+			trustOfAdvisors.set(aid,  1.0);
 
 			for(int f=0; f<honestBuyer.getBuyer(aid).getTrans().size(); f++){
 				//System.out.println("BSR0 " );
@@ -112,10 +116,10 @@ public class BRS extends Defense{
 					bsr1 = np_BAforS.get(1) + honestBuyer.getBuyer(aid).getTrans().get(1).getRating().getCriteriaRatings().get(0).getCriteriaRatingValue();
 				}
 			}
-			
-			
+
 			np_BAforS.set(0, bsr0);
 			np_BAforS.set(1, bsr1);
+
 			//System.out.println(np_BAforS.get(0) );
 			//consider the trust of advisors to two target sellers in duopoly e-marketplaces
 			storedAdvisors.add(aid);

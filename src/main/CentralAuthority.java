@@ -71,7 +71,6 @@ public class CentralAuthority {
 
 		//Day 0 is the eve of Day 1 (only for agents' decision making), transactions start on Day 1             
 		for (int day = 0; day < Parameter.NO_OF_DAYS; day++){                                                   
-                    
 			if (day != 0){
 				for (int count = 0; count<m_buyers.size();count++){
 					m_buyers.get(count).setCredits(m_buyers.get(count).getCredits()+Parameter.CREDITS_PER_TURN);
@@ -138,8 +137,9 @@ public class CentralAuthority {
                 }*/
  /* for(int i=0; i<m_buyers.size(); i++){
                                     m_buyers.get(i).setDay(day+1);
-                                }*/
-                        
+                               }*/
+                      System.out.println("MAE for day " + day + " is " + env.getDailyRepDiff().get(0) + " " + env.getDailyRepDiff().get(1));
+                     // System.out.println("MCC for day " + day + " is " + env.getDailyMCC().get(0) + " " + env.getDailyMCC().get(1));
                 }
 
 		return transList;
@@ -190,7 +190,7 @@ public class CentralAuthority {
 				m_buyers.get(bid).addTransaction(day);
 			}
 		}
-                m_buyers.get(0).calMAE(day);
+             //   m_buyers.get(0).calMAE(day);
               /*    for(int i=0; i<m_buyers.size(); i++){
                                     m_buyers.get(i).setDay(day+1);
                                 }*/
@@ -308,7 +308,7 @@ public class CentralAuthority {
 		transList = new ArrayList();
 		//output the result: [|transactions|, time]
 		//      double[][][][] results = new double[runtimes][defenseNames.length][attackNames.length][2];
-		for(int i = 0; i < runtimes; i++){
+		for(int i = 0; i < 1; i++){
 			for(int j = 0; j < defenseNames.size(); j++){            
 				for(int k = 0; k < attackNames.size(); k++){                 
 					//            System.err.print("  runtimes = " + i + ",   defense = " + defenseNames[j] + ",   attack = " + attackNames[k]);
