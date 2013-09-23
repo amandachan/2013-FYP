@@ -412,8 +412,9 @@ public abstract class Environment {
 	public void createARFFfile()throws Exception{
 		ArffSaver  saver = new ArffSaver();
 		saver.setInstances(data);
-		saver.setFile(new File("/Users/chanamanda/FYP.arff"));
-		//saver.setDestination(new File("c:/Users/NEEL/Desktop/Perceptron2.arff"));
+	saver.setFile(new File("c:/Users/NEEL/Desktop/FYP.arff"));
+         //       saver.setFile(new File("/Users/chanamanda/FYP.arff"));
+	//	saver.setDestination(new File("c:/Users/NEEL/Desktop/FYP.arff"));
 		saver.writeBatch();
 	}
 	public String getDefenseName(){
