@@ -54,7 +54,7 @@ public class Sybil extends Attack{
         return rVal;
     }
 
-    public Instance perform_attack(int day, Buyer dishonestBuyer){
+   /* public Instance perform_attack(int day, Buyer dishonestBuyer){
 
         this.day = day;
         Instances transactions = ecommerce.getM_Transactions();
@@ -87,7 +87,7 @@ public class Sybil extends Attack{
 
         return inst;
     }
-
+*/
     public Seller chooseSeller(Buyer b){
         int sellerid;
         if(PseudoRandom.randDouble() < Parameter.m_dishonestBuyerOntargetSellerRatio){ //Para.m_targetDomination
@@ -103,4 +103,4 @@ public class Sybil extends Attack{
         return "(Sybil dishonest_buyer_percentage: " + dishonest_buyer_percentage + ")";
     }
 
-}
+} //CLASS SYBIL
