@@ -276,6 +276,7 @@ public class Buyer extends Agent{
 		sVal = s1.getId();
 
 		double sHonestVal = ecommerce.getSellersTrueRating(s1.getId());
+                rVal = ecommerce.getM_SellersTrueRating().get(s1); //added by neel
 		//add instance, update the array in e-commerce
 		dVal = day + 1;
 		bVal = this.getId();

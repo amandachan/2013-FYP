@@ -20,7 +20,7 @@ import main.Parameter;
 public class Camouflage extends Attack{
 
     public Camouflage(){
-    } 
+    }
 
     public double giveUnfairRating(Instance inst){
 
@@ -46,15 +46,16 @@ public class Camouflage extends Attack{
         inst.setValue(Parameter.m_ratingIdx, rVal);
 
         //update the eCommerce information
+        if (ecommerce.getM_Transactions()!= null)
         ecommerce.getM_Transactions().add(new Instance(inst));
        // ecommerce.getTransactions().add(new Instance(inst));
        // ecommerce.updateArray(inst);
-    
+
         return rVal;
     }
 
 
-    public Instance perform_attack(int day, Buyer dishonestBuyer){
+  /*  public Instance perform_attack(int day, Buyer dishonestBuyer){
 
         this.day = day;
         Instances transactions = ecommerce.getM_Transactions();
@@ -93,7 +94,7 @@ public class Camouflage extends Attack{
 
         return inst;
     }
-
+*/
     public String getParameterInfo(){
         String str= "camouflage: ";
         return str;
@@ -111,4 +112,8 @@ public class Camouflage extends Attack{
 		return b.getSeller(sellerid);
              //   return sellerid;
 	}
-}
+}//CLASS CAMOUFLAGE
+
+
+
+
