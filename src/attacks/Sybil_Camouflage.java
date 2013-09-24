@@ -9,23 +9,24 @@
  */
 package attacks;
 
-import agent.Buyer;
+
 import agent.*;
+import attacks.Attack;
 import weka.core.Instance;
 import weka.core.Instances;
 import distributions.PseudoRandom;
-import environment.*;
 import main.Parameter;
 
-
-public class Sybil extends Attack{
+public class Sybil_Camouflage  extends Attack{
 
     //Attack parameter: no_of_dummies
     //After no_of_day_stay, the dishonest buyer just leaves and enters using a new account
     private double dishonest_buyer_percentage;
 
-    public Sybil(){
+    public Sybil_Camouflage(){
 
+//      Parameter.NO_OF_DISHONEST_BUYERS = 14;
+//      Parameter.NO_OF_HONEST_BUYERS = 6;
         dishonest_buyer_percentage = (double)Parameter.NO_OF_DISHONEST_BUYERS/((double)Parameter.NO_OF_HONEST_BUYERS + (double)Parameter.NO_OF_DISHONEST_BUYERS);
         if (dishonest_buyer_percentage < 0.5){
             System.out.println("No a Sybil attack! Please ensure disnohest buyers are majority.");
@@ -41,16 +42,25 @@ public class Sybil extends Attack{
             System.out.println("error, must be dishonest buyer");
         }
         int sVal = (int)(inst.value(Parameter.m_sidIdx));
-        double unfairRating = complementRating(sVal);
-        double rVal = unfairRating;
+        double rVal = 0.0;
+        if(sVal == Parameter.TARGET_DISHONEST_SELLER ||sVal == Parameter.TARGET_HONEST_SELLER){
+            //unfair ratings for target sellers
+            double unfairRating = complementRating(sVal);
+            rVal = unfairRating;
+        }
+        else if(sVal > Parameter.TARGET_DISHONEST_SELLER && sVal < Parameter.TARGET_HONEST_SELLER){
+            //fair rating for common sellers
+            rVal = ecommerce.getSellersTrueRating(sVal);
+        } else{
+            System.err.println("Not such rating");
+        }
         // add the rating to instances
         inst.setValue(Parameter.m_ratingIdx, rVal);
 
         //update the eCommerce information
         if (ecommerce.getM_Transactions()!= null)
                     ecommerce.getM_Transactions().add(new Instance(inst));
-        //m_eCommerce.getTransactions().add(new Instance(inst));
-        //m_eCommerce.updateArray(inst);
+
         return rVal;
     }
 
@@ -59,14 +69,19 @@ public class Sybil extends Attack{
         this.day = day;
         Instances transactions = ecommerce.getM_Transactions();
                 //ecommerce.getTransactions();
-
         //attack the target sellers with probability (Para.m_targetDomination), attack common sellers randomly with 1 - probability
         int chosen_seller;
-        if(PseudoRandom.randDouble() < Parameter.m_dishonestBuyerOntargetSellerRatio){ //Para.m_targetDomination
-            chosen_seller = (PseudoRandom.randDouble() < 0.5)? Parameter.TARGET_DISHONEST_SELLER:Parameter.TARGET_HONEST_SELLER;
-        }else{
-            //1 + [0, 18) = [1, 19) = [1, 18]
+        if(day < 0.2 * Parameter.NO_OF_DAYS){
+            //for common seller, give fair rating
             chosen_seller = 1 + (int) (PseudoRandom.randDouble() * (Parameter.NO_OF_DISHONEST_SELLERS + Parameter.NO_OF_HONEST_SELLERS - 2));
+        } else{
+            //attack the target sellers with probability (Para.m_targetDomination), attack common sellers randomly with 1 - probability
+            if(PseudoRandom.randDouble() < Parameter.m_dishonestBuyerOntargetSellerRatio){ //Para.m_targetDomination
+                chosen_seller = (PseudoRandom.randDouble() < 0.5)? Parameter.TARGET_DISHONEST_SELLER:Parameter.TARGET_HONEST_SELLER;
+            }else{
+                //1 + [0, 18) = [1, 19) = [1, 18]
+                chosen_seller = 1 + (int) (PseudoRandom.randDouble() * (Parameter.NO_OF_DISHONEST_SELLERS + Parameter.NO_OF_HONEST_SELLERS - 2));
+            }
         }
         int sVal = chosen_seller;
         double sHonestVal = ecommerce.getSellersTrueRating(sVal);
@@ -89,6 +104,7 @@ public class Sybil extends Attack{
     }
 */
     public Seller chooseSeller(Buyer b){
+
         int sellerid;
         if(PseudoRandom.randDouble() < Parameter.m_dishonestBuyerOntargetSellerRatio){ //Para.m_targetDomination
             sellerid = (PseudoRandom.randDouble() < 0.5)? Parameter.TARGET_DISHONEST_SELLER:Parameter.TARGET_HONEST_SELLER;
@@ -97,10 +113,11 @@ public class Sybil extends Attack{
             sellerid = 1 + (int) (PseudoRandom.randDouble() * (Parameter.NO_OF_DISHONEST_SELLERS + Parameter.NO_OF_HONEST_SELLERS - 2));
         }
         return b.getSeller(sellerid);
-    }
 
+    }
     public String getParameterInfo(){
-        return "(Sybil dishonest_buyer_percentage: " + dishonest_buyer_percentage + ")";
+        String str = "(dishonest_buyer_percentage: " + dishonest_buyer_percentage + ")";
+        str += " (comouflage)";
+        return str;
     }
-
-} //CLASS SYBIL
+} //class SybilCamouflage
