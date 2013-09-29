@@ -11,21 +11,23 @@ public class Seller extends Agent{
 
 	private ArrayList<Rating> ratingsToBuyers;
 	private ArrayList<Rating> ratingsFromBuyers;
-	private ArrayList<Product> productsOnSale;
+	private ArrayList<Product> productsOnSale = new ArrayList<Product>();
 	private ArrayList<Buyer> buyersRated;
 	private ArrayList<Buyer> buyersRatedMe;
-	private Product product;
-        public double mae;
 
-        public double getMAE(){
-            return mae;
-        }
+       
+	public Seller(){
+	}
+	public void addProductToList(Product p){
+		productsOnSale.add(p);
+	}
+	public ArrayList<Product> getProductsOnSale() {
+		return productsOnSale;
+	}
 
-        public void setMAE(double mae){
-            this.mae = mae;
-        }
-
-      
+	public void setProductsOnSale(ArrayList<Product> productsOnSale) {
+		this.productsOnSale = productsOnSale;
+	}
 
 	public ArrayList<Rating> getRatingsToBuyers() {
 		return ratingsToBuyers;

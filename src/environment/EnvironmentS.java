@@ -69,9 +69,11 @@ public class EnvironmentS extends Environment{
            System.out.println("enters generateInstances");
            //initialize the header information of instances
        Instances header = initialInstancesHeader();
+       Instances header2 = initialInstancesHeader2();
         m_Transactions = new Instances(header); //protected variable declared under Environment class.
-
+        balances = new Instances(header2);
         System.out.println(m_Transactions);
+        System.out.println(balances);
        //remove the above comment lines later...WE NEED the statements
        // dont remove statements
 

@@ -29,29 +29,25 @@ public abstract class Defense {
 	protected int m_NumInstances;	
 
 	//protected int[][][] BSR;   		// to store the [buyer][seller][binary rating -1, 1]
-	protected ArrayList<Double> trustOfAdvisors = new ArrayList<Double>(); 
 	// store the trustworthiness of advisors;
 	// for statistic features
 	protected ArrayList<Double> rtimes = new ArrayList<Double>();
 
 	//repuation for seller based on all buyer
-	public abstract void calculateReputation1(Buyer buyer1, Seller sid);
+	public abstract void calculateReputation1(Buyer buyer1, Seller sid, ArrayList<Boolean> trustAdvisors);
 	//reputation for seller based on one buyer
-	public abstract void calculateReputation2(Buyer buyer, Seller sid);
+	public abstract ArrayList<Boolean> calculateReputation2(Buyer buyer, Seller sid, ArrayList<Boolean> trustAdvisors);
 	//public abstract Rating calculateReputation3(int b, int p);
 	public abstract double calculateTrust(Seller seller, Buyer honestBuyer);
 	public abstract Seller chooseSeller(Buyer b, Environment ec);
 
-protected ArrayList<Integer>cmVals = new ArrayList<Integer>();
+	protected ArrayList<Integer>cmVals = new ArrayList<Integer>();
 	public void seteCommerce(Environment ec){
 		ecommerce = ec; 
 		for(int i=0; i<4; i++){
 			cmVals.add(i, 0);
 		}
-		for(int i=0; i<totalBuyers; i++){
-			trustOfAdvisors.add(i, 0.0);
-		}
-	
+
 	}
 
 	//perform the defense model
@@ -63,7 +59,9 @@ protected ArrayList<Integer>cmVals = new ArrayList<Integer>();
 			System.out.println("error, must be honest buyer");
 		}
 		int sVal = (int)(inst.value(Parameter.m_sidIdx));
-		double fairRating = 0; ecommerce.getSellersTrueRating(sVal);
+		double fairRating = ecommerce.getSellersTrueRating(sVal); 
+		//System.out.println("HELLO");
+		//System.out.println(ecommerce.getSellersTrueRating(sVal));
 		// add the rating to instances
 		inst.setValue(Parameter.m_ratingIdx, fairRating);	
 
@@ -75,9 +73,9 @@ protected ArrayList<Integer>cmVals = new ArrayList<Integer>();
 
 	//----- to be moved to evaluation metrics in future --------------------------------------------------
 
-	
 
-	private int[] cofusionMatrix() {
+
+/*	private int[] cofusionMatrix() {
 
 		// true positive, false negative, false positive, true negative,
 		int[] cmVals = new int[4];
@@ -85,8 +83,8 @@ protected ArrayList<Integer>cmVals = new ArrayList<Integer>();
 		for (int k = 0; k < totalBuyers; k++) {
 			int aid = k;
 			if (aid >= Parameter.NO_OF_DISHONEST_BUYERS && aid < totalBuyers) { // ground truth: honest advisors
-				
-				
+
+
 				if (trustOfAdvisors.get(aid) > 0.5) // true positive
 					cmVals[0]++;
 				else if (trustOfAdvisors.get(aid)< 0.5) // false negative
@@ -100,9 +98,9 @@ protected ArrayList<Integer>cmVals = new ArrayList<Integer>();
 		}
 
 		return cmVals;
-	}
+	}*/
 
-	public double calculateMCCofAdvisorTrust(int sid) {
+	/*public double calculateMCCofAdvisorTrust(int sid) {
 
 		double MCC = 0.0;
 		double tp, fn, fp, tn;
@@ -110,21 +108,21 @@ protected ArrayList<Integer>cmVals = new ArrayList<Integer>();
 		//System.out.println("m_NumDB:"+m_NumDB);
 		//System.out.println("m_NumBuyers:"+m_NumBuyers);
 		//for (int i = m_NumDB; i < m_NumBuyers;i++) {
-			//System.out.println("iNSIDE");
-			//int bid = i;
-			
-			for (int j = 0; j < totalSellers; j++) {
+		//System.out.println("iNSIDE");
+		//int bid = i;
+
+		for (int j = 0; j < totalSellers; j++) {
 			if(j!=sid)continue;
 			//	m_trustA[bid] = 0.5; // to avoid compare itself in confusion matrix				
-				int[] cvals = cofusionMatrix();
-//				System.out.println("(bid " + bid + ", sid " + sid + ") = " + cvals[0] + ", " + cvals[1] + ", " + cvals[2] + ", " + cvals[3]);
-				tp += cvals[0];
-				fn += cvals[1];
-				fp += cvals[2];
-				tn += cvals[3];
+			int[] cvals = cofusionMatrix();
+			//				System.out.println("(bid " + bid + ", sid " + sid + ") = " + cvals[0] + ", " + cvals[1] + ", " + cvals[2] + ", " + cvals[3]);
+			tp += cvals[0];
+			fn += cvals[1];
+			fp += cvals[2];
+			tn += cvals[3];
 			//}
 		}
-	    
+
 		MCC = (tp * tn - fp * fn)
 				/ Math.sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn));
 		//System.out.println("\ntp="+tp+"\ttn="+tn+"\tfp="+fp+"\tfn="+fn+"\tmcc="+MCC);
@@ -133,5 +131,5 @@ protected ArrayList<Integer>cmVals = new ArrayList<Integer>();
 		}
 		//System.out.println("MCC:"+MCC);
 		return MCC;
-	}
+	}*/
 }

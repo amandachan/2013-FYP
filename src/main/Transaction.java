@@ -12,7 +12,7 @@ public class Transaction {
 
 	private Buyer buyer;
 	private Seller seller;
-	private int product;
+	private Product product;
 	private String time;
 	private double amountPaid;
 	private Rating rating;
@@ -57,7 +57,7 @@ public class Transaction {
 
 	}
 	
-	public void create(Buyer buyer, Seller seller, int product, int quantity, double price, int day, double amountPaid, double value, int cid){
+	public void create(Buyer buyer, Seller seller, Product product, int quantity, double price, int day, double amountPaid, double value, int cid){
 		this.buyer = buyer;
 		this.seller = seller;
 		this.product = product;

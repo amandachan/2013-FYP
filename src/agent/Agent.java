@@ -26,49 +26,58 @@ public abstract class Agent {
 	protected String defenseName = null;
 	protected String attackName = null;
 	protected Attack attackModel;
-	
+
 
 	protected Defense defenseModel = null;
 	//previously BSR[][][]. Transaction stores the buyer's rating to sellers also.
 	protected ArrayList<Transaction> trans = new ArrayList<Transaction>();
 	protected Account account;
-        protected double credits=0.0;
+	protected double credits=0.0;
+
 	
+	
+	public Account getAccount() {
+		return account;
+	}
+
+	public void setAccount(Account account) {
+		this.account = account;
+	}
+
 	public Agent() { 
 		account = new Account();
-                attackModel = new AlwaysUnfair();
-                defenseModel = new BRS();
-                
+		account.create();
+		attackModel = new AlwaysUnfair();
+		defenseModel = new BRS();
+
 		//history = new Instances(ecommerce.getM_Transactions());
 	}
-	
+
 	public void setGlobalInformation(ArrayList<Seller> sellers, ArrayList<Buyer> buyers){
 		this.listOfBuyers = buyers;
 		this.listOfSellers = sellers;
 	}
 
-        public double getCredits(){
-            return credits;
-        }
+	public double getCredits(){
+		return credits;
+	}
 
-        public void setCredits(double credits){
-            this.credits=credits;
-        }
-	
+	public void setCredits(double credits){
+		this.credits=credits;
+	}
+
 	public int getId() {
 		return id;
 	}
-	
+
 	public void setId(int id) {
 		this.id = id;
 	}
+
 	
-	public void setAccount(double balance){ //added by neel
-            account.editBalance(balance);
-        }
 	public Account getAccountDetails(){  //added by neel
-            return account;
-        }
+		return account;
+	}
 
 	public int getDay() {
 		return day;
@@ -157,15 +166,15 @@ public abstract class Agent {
 	public void setIshonest(boolean ishonest) {
 		this.ishonest = ishonest;
 	}
-	
+
 	public void addInstance(Instance inst){
 		history.add(inst);
 	}
-	
+
 	public Seller getSeller(int sid){
 		return listOfSellers.get(sid);
 	}
-	
+
 	public Buyer getBuyer(int bid){
 		return listOfBuyers.get(bid);
 	}
@@ -174,6 +183,6 @@ public abstract class Agent {
 		this.ecommerce = ecommerce;
 		history = new Instances(ecommerce.getM_Transactions());
 	}
-	
+
 
 }

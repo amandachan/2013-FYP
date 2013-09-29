@@ -122,14 +122,25 @@ public class Parameter {
 	public static final String sellerIdString= "seller_id";
 	public static final String sellerHonestyString = "seller_is_honest";
 	public static final String ratingString = "rating";
+	public static final String salePriceString = "saleprice";
+	public static final String productString = "product";
+	public static final String sellerBalString = "sellerbalance";
+	public static final String buyerBalString = "buyerbalance";
 	
 	//same as the database settings;
 	public static final int m_dayIdx = 0;
 	public static final int m_bidIdx = 1;
+	public static final int m_bbalIdx = 2;
 	public static final int m_bHonestIdx = 2;
+	public static final int m_pIdx = 3;
 	public static final int m_sidIdx = 3;
+	public static final int m_ppriceIdx = 4;
 	public static final int m_sHonestIdx = 4;	
+	public static final int m_sidIdx2 = 5;
 	public static final int m_ratingIdx = 5;
+	public static final int m_sHonestIdx2 = 6;
+	public static final int m_sbalIdx = 7;
+
 	/*************fixed values, unless big change**************/
 	
 	public static final boolean includeWhitewashing(){

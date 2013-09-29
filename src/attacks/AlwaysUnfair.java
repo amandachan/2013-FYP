@@ -18,19 +18,16 @@ import distributions.PseudoRandom;
 
 
 public class AlwaysUnfair extends Attack{
-	
+
 	//randomly choose seller
 	public Seller chooseSeller(Buyer b){
-		//attack the target sellers with probability (Para.m_targetDomination), attack common sellers randomly with 1 - probability
 		int sellerid;
-		if(PseudoRandom.randDouble() < Parameter.m_dishonestBuyerOntargetSellerRatio){ //Para.m_targetDomination
+		if(PseudoRandom.randDouble() < Parameter.m_dishonestBuyerOntargetSellerRatio){ 
 			sellerid = (PseudoRandom.randDouble() < 0.5)? Parameter.TARGET_DISHONEST_SELLER:Parameter.TARGET_HONEST_SELLER;
 		} else{
-			//1 + [0, 18) = [1, 19) = [1, 18]
 			sellerid = 1 + (int) (PseudoRandom.randDouble() * (Parameter.NO_OF_DISHONEST_SELLERS + Parameter.NO_OF_HONEST_SELLERS - 2));
 		}
 		return b.getSeller(sellerid);
-             //   return sellerid;
 	}
 
 	//give unfair rating to seller
@@ -44,14 +41,13 @@ public class AlwaysUnfair extends Attack{
 		int sVal = (int)(inst.value(Parameter.m_sidIdx));
 		double unfairRating = complementRating(sVal);
 		double rVal = unfairRating;		
-		
+
 		// add the unfair rating to instances		
 		inst.setValue(Parameter.m_ratingIdx, rVal);
-		
+
 		//update the eCommerce information
-                if (ecommerce.getM_Transactions()!= null)
-                    ecommerce.getM_Transactions().add(new Instance(inst));
-//		ecommerce.updateArray(inst);
+		if (ecommerce.getM_Transactions()!= null)
+			ecommerce.getM_Transactions().add(new Instance(inst));
 		return rVal;
 	}
 

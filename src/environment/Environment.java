@@ -12,6 +12,9 @@ import agent.Seller;
 
 
 import java.util.ArrayList;
+
+import weka.core.Attribute;
+import weka.core.FastVector;
 import weka.core.Instances;
 import java.util.*;
 import weka.core.*;
@@ -20,23 +23,29 @@ import java.lang.*;
 public abstract class Environment {
 
 	public FastVector attInfo;
+	public FastVector attInfo2;
 	public FastVector attBuyer;
 	public FastVector attbuyerHonest;
 	public FastVector attSeller;
+	public FastVector attProduct;
+	public FastVector attSellerHonest;
 	public Instances data;
+	public Instances data2;
 
 	protected ArrayList<Buyer> buyerList;
 	protected ArrayList<Seller> sellerList;
 	protected ArrayList<Transaction> transactionList;
+	protected ArrayList<Product> productList;
 
 
-	protected int m_NumAtts = 6;                        //[ day, buyer_id, buyer_is_honest, seller_id, seller_is_honest, rating]
+//	protected int m_NumAtts = 6;                        //[ day, buyer_id, buyer_is_honest, seller_id, seller_is_honest, rating]
 	protected int m_Numdays;                                //days of transactions;
 	protected int m_NumBuyers;
 	protected int m_NumSellers;
 	protected int m_NumRating;                        //binary, multinominal, real
 
 	protected Instances m_Transactions = null;
+	protected Instances balances = null;
 	//attack name and defense name
 	protected String m_AttackName = null;
 	protected String m_DefenseName = null;
@@ -51,6 +60,8 @@ public abstract class Environment {
 	//protected double[] m_SellersTrueRep;
 
 	protected HashMap<Seller,Double> m_SellersTrueRep;
+	protected HashMap<Seller, Double> sellerBankBalance = new HashMap<Seller, Double>();
+	protected HashMap<Buyer, Double> buyerBankBalance = new HashMap<Buyer, Double>();
 
 	protected int Day;
 	//[day][all seller] sales
@@ -79,6 +90,7 @@ public abstract class Environment {
 		buyerList = new ArrayList<Buyer>();
 		sellerList = new ArrayList<Seller>();
 		transactionList = new ArrayList<Transaction>();
+		productList = new ArrayList<Product>();
 
 		m_SellersTrueRating = new HashMap<Seller, Double>();
 		m_SellersTrueRep = new HashMap<Seller, Double>();
@@ -93,6 +105,31 @@ public abstract class Environment {
 		}
 
 	}
+
+
+
+	public ArrayList<Product> getProductList() {
+		return productList;
+	}
+
+
+
+	public void setProductList(ArrayList<Product> productList) {
+		this.productList = productList;
+	}
+
+
+
+	public Instances getBalances() {
+		return balances;
+	}
+
+
+
+	public void setBalances(Instances balances) {
+		this.balances = balances;
+	}
+
 
 
 	public HashMap<Seller, Double> getM_SellersTrueRating() {
@@ -217,6 +254,7 @@ public abstract class Environment {
 		//      }
 		//for rating nominal, real
 		attInfo.addElement(new Attribute(Parameter.ratingString));
+		//	attInfo.addElement(new Attribute(Parameter.ra))
 
 		String instsName = new String("eCommerce.arff");
 		Instances header = new Instances(instsName, attInfo, m_Numdays * (m_NumBuyers));
@@ -224,6 +262,67 @@ public abstract class Environment {
 		//      header.setSellerIndex(header.numAttributes() - 1);
 
 		data=new Instances("eCommerce.arff",attInfo,0);
+
+		return header;
+	}
+
+	//FOR BUYER / SELLER BALANCE INFO
+	public Instances initialInstancesHeader2(){
+		//System.out.println("product size" + productList.size());
+
+		System.out.println("enters instance header 2");
+		attInfo2 = new FastVector();
+		//attribute include: [day, p_id, buyer_id, buyer_is_honest, seller_id, seller_is_honest, rating]
+		//for day information
+		attInfo2.addElement(new Attribute(Parameter.dayString));         //for time information, real
+
+		//for buyer/advisor information, string, because the whitewashing problem
+
+		attBuyer = new FastVector();
+		for(int i = 0; i < m_NumBuyers; i++){
+			String str = "b" + Integer.toString(i);
+			attBuyer.addElement(str);
+		}
+
+		attInfo2.addElement(new Attribute(Parameter.buyerIdString, attBuyer));
+
+
+		attInfo2.addElement(new Attribute(Parameter.buyerBalString));
+
+		attProduct = new FastVector();               
+		for(int i = 0; i < m_NumSellers; i++){
+			String str = "p" + Integer.toString(i);
+			attProduct.addElement(str);
+		}
+		attInfo2.addElement(new Attribute(Parameter.productString, attProduct));
+
+		attInfo2.addElement(new Attribute(Parameter.salePriceString));
+
+
+		attSeller = new FastVector();
+		for(int i = 0; i < m_NumSellers; i++){
+			String str = "s" + Integer.toString(i);
+			attSeller.addElement(str);
+		}
+		attInfo2.addElement(new Attribute(Parameter.sellerIdString, attSeller));
+
+		//for seller dishonest/honest = true rating, more general type is real according to rating type
+		attSellerHonest = new FastVector(); 				
+		attSellerHonest.addElement(Parameter.agent_dishonest);                               //[dishonest, honest]
+		attSellerHonest.addElement(Parameter.agent_honest);
+
+		attInfo2.addElement(new Attribute(Parameter.sellerHonestyString, attSellerHonest));
+
+		attInfo2.addElement(new Attribute(Parameter.sellerBalString));
+
+		//	attInfo2.addElement(new Attribute(Parameter.sellerBalString));
+
+		String instsName = new String("eCommerce2.arff");
+		Instances header = new Instances(instsName, attInfo2, m_Numdays * (m_NumBuyers));
+		//set the class index
+		//      header.setSellerIndex(header.numAttributes() - 1);
+
+		data2=new Instances("eCommerce2.arff",attInfo2,0);
 
 		return header;
 	}
@@ -238,7 +337,7 @@ public abstract class Environment {
 			for(int i = 0; i < Parameter.NO_OF_DISHONEST_SELLERS; i++){
 				m_SellersTrueRating.put(sellerList.get(i),-1.0);
 				m_SellersTrueRep.put(sellerList.get(i), 0.0);
-			//	System.out.println("the true reputation "+m_SellersTrueRep.get(sellerList.get(i)));
+				//	System.out.println("the true reputation "+m_SellersTrueRep.get(sellerList.get(i)));
 			}
 
 			/* for(int i = 0; i < Parameter.NO_OF_DISHONEST_SELLERS; i++){    COMMENTED BY NEEL
@@ -388,6 +487,24 @@ public abstract class Environment {
 			sellerList.get(i).setListOfSellers(sellerList);
 		}
 
+		for(int i=0; i<sellerList.size(); i++){
+			Product p = new Product();
+			p.setId(i);
+			p.setPrice(i);
+			p.setS(sellerList.get(i));
+			productList.add(p); 
+			sellerList.get(i).addProductToList(p);
+		}
+		//System.out.println("HELLO PRODCUT LIST " + productList.size());
+		for(int i=0; i<productList.size(); i++){
+			productList.get(i).setListOfProducts(productList);
+		}
+		for(int i=0; i<sellerList.size(); i++){
+			sellerBankBalance.put(sellerList.get(i), 0.0);
+		}
+		for(int i=0; i<buyerList.size(); i++){
+			buyerBankBalance.put(buyerList.get(i), 0.0);
+		}
 	} //agentSetting
 
 	//Instances data=new Instances("eCommerce.arff",attInfo,0);
@@ -404,7 +521,29 @@ public abstract class Environment {
 		vals[3]=attSeller.indexOf("s"+sVal);
 		vals[4]=sHonestVal;
 		vals[5]=rVal;
+		//vals[6]=currentRating;
 		data.add(new Instance(1.0,vals));
+
+		//System.out.println(data);
+	}
+
+
+	public void createData2(int dVal,String bVal,double buyerBal,String product,double saleprice, String sVal, String ishonest, double sellerBal){
+
+		double vals[] = new double[data2.numAttributes()];
+		vals[0]=dVal;
+		vals[1]=attBuyer.indexOf("b"+bVal);
+		vals[2]=buyerBal;
+		vals[3]=attProduct.indexOf("p"+product);
+		vals[4]=saleprice;
+		vals[5]=attSeller.indexOf("s"+sVal);
+		vals[6]=attSellerHonest.indexOf(ishonest);
+		vals[7]=sellerBal;
+		//System.out.println(ishonest);
+		//vals[6]=currentRating;
+		data2.add(new Instance(1.0,vals));
+	//	System.out.println(data2.numInstances());
+		//System.out.println(data2);
 
 		//System.out.println(data);
 	}
@@ -412,11 +551,24 @@ public abstract class Environment {
 	public void createARFFfile()throws Exception{
 		ArffSaver  saver = new ArffSaver();
 		saver.setInstances(data);
-	saver.setFile(new File("c:/Users/NEEL/Desktop/FYP.arff"));
-         //       saver.setFile(new File("/Users/chanamanda/FYP.arff"));
-	//	saver.setDestination(new File("c:/Users/NEEL/Desktop/FYP.arff"));
+		saver.setFile(new File("c:/Users/NEEL/Desktop/FYP.arff"));
+
+		//       saver.setFile(new File("/Users/chanamanda/FYP.arff"));
+		//	saver.setDestination(new File("c:/Users/NEEL/Desktop/FYP.arff"));
 		saver.writeBatch();
 	}
+
+	public void createBalanceArff()throws Exception{
+
+
+		ArffSaver saver2 = new ArffSaver();
+		saver2.setInstances(data2);
+		saver2.setFile(new File("c:/Users/NEEL/Desktop/Balance.arff"));
+		//       saver.setFile(new File("/Users/chanamanda/FYP.arff"));
+		//	saver.setDestination(new File("c:/Users/NEEL/Desktop/FYP.arff"));
+		saver2.writeBatch();
+	}
+
 	public String getDefenseName(){
 		return m_DefenseName;
 	}
@@ -481,31 +633,15 @@ public abstract class Environment {
 	//--- added by Amanda, needed for buyer class -------------
 	//to get true rating of seller from hashmap
 	public double getSellersTrueRating(int s1){
-		for ( Seller key : m_SellersTrueRating.keySet() ) {
-			if(key.getId() == s1){
-				return m_SellersTrueRating.get(key);
-			}
-		}
-		return 0;
-	}
+		return m_SellersTrueRating.get( sellerList.get(s1));
 
+	}
 	//for MAE calculation
 	public double getSellersTrueRep(int s1){
 
 		//   System.out.println( m_SellersTrueRep.size());
 		return m_SellersTrueRep.get( sellerList.get(s1));
-		//for ( Seller key : m_SellersTrueRep.keySet() ) {
-		/*   Seller S;// = getSellerList().get(0);
-            for(int i=0;i<getSellerList().size();i++){
-                S=getSellerList().get(i);
-                        if(S.getId() == s1){
-                          System.out.println("sellers true rep "+m_SellersTrueRep.get(S).toString());
 
-                            return m_SellersTrueRep.get(S);
-			}
-
-            }*/
-		//return 0;
 	}
 
 	public void updateTransactionList(Transaction t){
@@ -513,25 +649,6 @@ public abstract class Environment {
 	}
 	public HashMap getSellersTrueRepMap(){
 		return m_SellersTrueRep;
-	}
-
-	public void updateDailyMCC(ArrayList<Double> mccVals){		
-
-		//dishonest seller
-		double new0 = dailyMCCDishonestSeller.get(Day) + mccVals.get(0);
-		dailyMCCDishonestSeller.put(Day, new0);
-
-		//honest seller
-		double new1 = dailyMCCHonestSeller.get(Day) + mccVals.get(1);
-		dailyMCCHonestSeller.put(Day, new1);
-
-		//calculate the reputation difference on target dishonest/honest sellers.
-		/*for (int j = 0; j < 2; j++) {			
-			//int sid = Parameter.TARGET_DISHONEST_SELLER;
-			//if (j == 1)sid = Parameter.TARGET_HONEST_SELLER;
-			//m_DailyRep[m_Day][j] += mccVals[j];
-			m_DailyMCC[m_Day][j] += mccVals[j];
-		}*/
 	}
 
 	public void updateDailyReputationDiff(ArrayList<Double> trustVals){
@@ -547,28 +664,28 @@ public abstract class Environment {
 		double diff1 = dailyRepDiffHonestSeller.get(Day) + Math.abs(m_SellersTrueRep.get(sellerList.get(sidHonest)) - trustVals.get(1));
 		dailyRepDiffHonestSeller.put(Day, diff1);
 	}
-	
-	
+
+
 	public ArrayList<Double> getDailyMCC(){
 		ArrayList<Double> dm = new ArrayList<Double>();
-		
+
 		double val0 = dailyMCCDishonestSeller.get(Day) / (Parameter.NO_OF_HONEST_BUYERS);
 		double val1 = dailyMCCHonestSeller.get(Day) / (Parameter.NO_OF_HONEST_BUYERS);
 		dm.add(0, val0);
 		dm.add(1, val1);
 		return dm;
 	}
-	
+
 	public ArrayList<Double> getDailyReputation(){
 		ArrayList<Double> dr = new ArrayList<Double>();
-		
+
 		double val0 = dailyRepDishonestSeller.get(Day) / (Parameter.NO_OF_HONEST_BUYERS);
 		double val1 = dailyRepHonestSeller.get(Day) / (Parameter.NO_OF_HONEST_BUYERS);
 		dr.add(0, val0);
 		dr.add(1, val1);
 		return dr;
 	}
-	
+
 	public ArrayList<Double> getDailyRepDiff(){
 		ArrayList<Double> drd = new ArrayList<Double>();
 		double val0 = dailyRepDiffDishonestSeller.get(Day) / ((Day+1) * Parameter.NO_OF_HONEST_BUYERS);
@@ -577,5 +694,31 @@ public abstract class Environment {
 		drd.add(1,val1);
 		return drd;
 	}
+
+
+
+	public HashMap<Seller, Double> getSellerBankBalance() {
+		return sellerBankBalance;
+	}
+
+
+
+	public void setSellerBankBalance(HashMap<Seller, Double> sellerBankBalance) {
+		this.sellerBankBalance = sellerBankBalance;
+	}
+
+
+
+	public HashMap<Buyer, Double> getBuyerBankBalance() {
+		return buyerBankBalance;
+	}
+
+
+
+	public void setBuyerBankBalance(HashMap<Buyer, Double> buyerBankBalance) {
+		this.buyerBankBalance = buyerBankBalance;
+	}
+
+
 }//class
 

@@ -9,8 +9,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
 
-import weka.core.Instance;
-import weka.core.Instances;
 import weka.core.*;
 
 import main.Product;
@@ -24,15 +22,16 @@ import main.Parameter;
 
 import attacks.AlwaysUnfair;
 import attacks.Attack;
+import attacks.Camouflage;
 
 public class Buyer extends Agent{
 
-        public HashMap<Integer,Double> MAEList =new HashMap();
+	public HashMap<Integer,Double> MAEList =new HashMap();
 
 
 	private boolean ishonest;
 	private ArrayList<Rating> ratingsToProducts;
-	private ArrayList<Integer> productsPurchased;
+	private ArrayList<Product> productsPurchased = new ArrayList<Product>();
 	private ArrayList<Seller> sellersRated = new ArrayList<Seller>();
 
 	//buyer's current rating (the most recent rating made by the buyer)
@@ -48,10 +47,10 @@ public class Buyer extends Agent{
 	private double[] bounds = {0.0, 1.0};
 	private double fitness;
 	private int TNtype = 1; //0/1/2 means honest trust network/noise/collusive
-        private boolean checkDay = false;
+	private boolean checkDay = false;
 
 	public Buyer (int id){
-		
+
 		this.id = id;
 
 	}
@@ -75,11 +74,11 @@ public class Buyer extends Agent{
 		this.ratingsToProducts = ratingsToProducts;
 	}
 
-	public ArrayList<Integer> getProductsPurchased() {
+	public ArrayList<Product> getProductsPurchased() {
 		return productsPurchased;
 	}
 
-	public void setProductsPurchased(ArrayList<Integer> productsPurchased) {
+	public void setProductsPurchased(ArrayList<Product> productsPurchased) {
 		this.productsPurchased = productsPurchased;
 	}
 
@@ -88,13 +87,13 @@ public class Buyer extends Agent{
 		return buyerTransactions;
 	}
 
-	public ArrayList<Integer> getPurchasedProducts(){
+	public ArrayList<Product> getPurchasedProducts(){
 		return productsPurchased;
 	}
 
 	//give rating
 	public void rateSeller(int day){
-	
+
 		if(this.day > 0){//scan all the history information,
 			for (int i = 0; i < history.numInstances(); i++) {
 				Instance inst = history.instance(i);
@@ -194,8 +193,7 @@ public class Buyer extends Agent{
 
 		//get hashmap of seller id & product id
 		HashMap<Integer, ArrayList<Integer>> prodList = new HashMap<Integer, ArrayList<Integer>>();
-		Product p = new Product();
-		prodList = p.getProductid();
+
 
 		//get list of products sold by the seller
 		ArrayList<Integer> prodid = new ArrayList<Integer>();
@@ -212,8 +210,6 @@ public class Buyer extends Agent{
 
 		//get hashmap of product id and sale price
 		HashMap<Integer, Double> priceList = new HashMap<Integer, Double>();
-		Product p = new Product();
-		priceList = p.getSaleprice();
 
 		//get price of product
 		double price = priceList.get(productid);
@@ -221,22 +217,15 @@ public class Buyer extends Agent{
 	}
 
 
-     /*   public void calMAE(int day){
-           double mae = defenseModel.calculateMAEofSellerReputation(this,ecommerce.getSellersTrueRepMap(),ecommerce);
-           MAEList.put(day,mae);
-            
-                System.out.println("Day " + this.day + " MAE " + mae);
-
-        }*/
-
 	//create transaction that includes buyer, seller and product
 	public Instance addTransaction(int day){
-            this.day = ecommerce.getDay();
-         //   System.out.println("check day on addTran "+day);
-            int dVal, bVal, sVal=0, productid; double mae=0.0;
-            Seller s1 = null;
-            String bHonestVal = null;
-            		if (ishonest==false){ //attack
+		this.day = ecommerce.getDay();
+		int dVal, bVal, sVal=0, productid; double mae=0.0;
+		Seller s1 = null;
+		String bHonestVal = null;
+		String shonest = null;
+
+		if (ishonest==false){ //attack
 			//select seller and product, then create transaction
 
 			s1 = attackModel.chooseSeller(this);
@@ -247,40 +236,48 @@ public class Buyer extends Agent{
 			bHonestVal = Parameter.agent_honest;
 
 		}
-           // System.out.println("this.day " + this.day + "day " + day);
-
-          /* if (this.day != day){
-                mae = defenseModel.calculateMAEofSellerReputation(this,ecommerce.getSellersTrueRepMap(),ecommerce);
-                MAEList.put(ecommerce.getSellerList().get(sVal),mae);
-            this.day = day;
-                System.out.println("this.day " + this.day + "day " + day);
-              
-            }*/
 		this.day = day;
 		Instances transactions = ecommerce.getM_Transactions();
+		Instances balances = ecommerce.getBalances();
 		double rVal = Parameter.nullRating();
-		
-		
-		double salePrice;
-		
 
-		//productid = chooseProduct(s1);
-		//salePrice = buyProduct(productid);
+		if (s1.ishonest == true){
+			double newBal = ecommerce.getBuyerBankBalance().get(this) + 1.0;
+			ecommerce.getBuyerBankBalance().put(this, newBal);
+		}
+		else {
+			double newBal = ecommerce.getBuyerBankBalance().get(this) - 1.0;
+			ecommerce.getBuyerBankBalance().put(this, newBal);
+		}
+
+		double salePrice;
+
+
+		Product p = s1.getProductsOnSale().get(0);
 		Transaction t = new Transaction();
 		rateSeller(day);
-		t.create(this, s1, 1, 1, 1.0, day, 1.0, currentRating, s1.getId());
+		//Buyer buyer, Seller seller, Product product, int quantity, double price, int day, double amountPaid, double value, int cid
+		t.create(this, s1, p, 1, p.getPrice(), day, p.getPrice()*1, currentRating, 1);
+		ecommerce.getTransactionList().add(t);
+		account.editBalance(p.getPrice(), t);
+		s1.getAccount().addToBalance(p.getPrice());
 		sellersRated.add(s1);
-		//productsPurchased.add(productid);
+		productsPurchased.add(p);
 		trans.add(t);
 		ecommerce.updateTransactionList(t);
 		sVal = s1.getId();
-
+		if (s1.isIshonest()==true)
+			shonest = Parameter.agent_honest;
+		else
+			shonest = Parameter.agent_dishonest;
 		double sHonestVal = ecommerce.getSellersTrueRating(s1.getId());
-                rVal = ecommerce.getM_SellersTrueRating().get(s1); //added by neel
+		rVal = ecommerce.getM_SellersTrueRating().get(s1); //added by neel
 		//add instance, update the array in e-commerce
 		dVal = day + 1;
 		bVal = this.getId();
 		Instance inst = new Instance(transactions.numAttributes());
+		Instance inst1 = new Instance(balances.numAttributes());
+
 		inst.setDataset(transactions);
 		inst.setValue(Parameter.m_dayIdx, dVal);
 		inst.setValue(Parameter.m_bidIdx, "b" + Integer.toString(bVal)); 
@@ -290,22 +287,37 @@ public class Buyer extends Agent{
 		inst.setValue(Parameter.m_ratingIdx, rVal);	
 		this.addInstance(new Instance(inst));
 
-                ecommerce.createData(dVal,Integer.toString(bVal),bHonestVal,Integer.toString(sVal),sHonestVal,rVal);
-               try{
-                ecommerce.createARFFfile();
-               }
-               catch(Exception e){}
-                //HashMap<Seller,Double> MAEList = new HashMap();
+		inst1.setDataset(balances);
+		inst1.setValue(Parameter.m_dayIdx, dVal);
+		inst1.setValue(Parameter.m_bidIdx, "b" + Integer.toString(bVal)); 
+		inst1.setValue(Parameter.m_bbalIdx, this.getAccount().getBalance());
+		inst1.setValue(Parameter.m_pIdx, "p" + Integer.toString(p.getId()));
+		inst1.setValue(Parameter.m_ppriceIdx, p.getPrice());			
+		inst1.setValue(Parameter.m_sidIdx2, sVal);	
+		inst1.setValue(Parameter.m_sHonestIdx2, sHonestVal);			
+		inst1.setValue(Parameter.m_sbalIdx, s1.getAccount().getBalance());		
+		//this.addInstance(new Instance(inst1));
 
 
-             //   System.out.println("Seller ID: " + s1.getId() + " Buyer ID: " + this.getId() + " Rating: " + currentRating + " Day: " + day + " MAE " + mae);
+		ecommerce.createData(dVal,Integer.toString(bVal),bHonestVal,Integer.toString(sVal),sHonestVal,currentRating);
+		ecommerce.createData2(dVal,Integer.toString(bVal),this.getAccount().getBalance(),Integer.toString(p.getId()),p.getPrice(), Integer.toString(sVal),shonest,s1.getAccount().getBalance());
+
+		try{
+			ecommerce.createARFFfile();
+			ecommerce.createBalanceArff();
+		}
+		catch(Exception e){}
+		//HashMap<Seller,Double> MAEList = new HashMap();
+
+	//	System.out.println("Buyer: " + this.getId() + " Seller: " + s1.getId() + " Buyer Balance: " + this.getAccount().getBalance() + " Seller Balnce: " + s1.getAccount().getBalance() + " Balance: " + ecommerce.getBuyerBankBalance().get(this) + " Rating: " + currentRating);
+		//   System.out.println("Seller ID: " + s1.getId() + " Buyer ID: " + this.getId() + " Rating: " + currentRating + " Day: " + day + " MAE " + mae);
 		return inst;
 	}
 
-        public HashMap getMAEList(){
-            return this.MAEList;
-        }
-        
+	public HashMap getMAEList(){
+		return this.MAEList;
+	}
+
 	//----the below is used to build buyer's trust network of advisors-------------------------------
 
 	public void calculateAverageTrusts(int sid){

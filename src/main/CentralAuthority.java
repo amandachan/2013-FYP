@@ -81,7 +81,7 @@ public class CentralAuthority {
 				DecimalFormat roundoff = new DecimalFormat("#.##");
 				//Transaction trans = new Transaction();
 				//  trans.setDay(day);
-			//	m_buyers.get(a).addTransaction(day);
+				//	m_buyers.get(a).addTransaction(day);
 
 				/*       double cost = trans.getQuantity()*trans.getPrice();
                 cost = Double.valueOf(roundoff.format(cost));
@@ -93,7 +93,7 @@ public class CentralAuthority {
                 }
                 transList.add(trans);
 				 */
-				}
+			}
 
 			//step 2: Attack model (dishonest buyers)               
 			attack(day);            
@@ -125,9 +125,9 @@ public class CentralAuthority {
 				//                System.out.print("   |repDiff MAE|: " + m_dailyRepDiff[day][0] + "  " + m_dailyRepDiff[day][1]);
 				// System.out.println(" avgWeights: " + m_dailyAvgWeights[day][0] + "  " + m_dailyAvgWeights[day][1]);
 				System.out.println("avg. weights for dishonest: "+ dishonest_avgWt.get(day) +"  avg. weights for honest "+honest_avgWt.get(day));
-                              
+
 			}
-		/*HashMap<Seller,Double> maeComp = new HashMap();
+			/*HashMap<Seller,Double> maeComp = new HashMap();
                 for(int i=0;i<m_buyers.size();i++){
                    maeComp = m_buyers.get(i).getMAEList();
                   for(int j=0;j<m_sellers.size();j++){
@@ -135,12 +135,22 @@ public class CentralAuthority {
                   }
 
                 }*/
- /* for(int i=0; i<m_buyers.size(); i++){
+			/* for(int i=0; i<m_buyers.size(); i++){
                                     m_buyers.get(i).setDay(day+1);
                                }*/
-                      System.out.println("MAE for day " + day + " is " + env.getDailyRepDiff().get(0) + " " + env.getDailyRepDiff().get(1));
-                     // System.out.println("MCC for day " + day + " is " + env.getDailyMCC().get(0) + " " + env.getDailyMCC().get(1));
-                }
+			//System.out.println()
+			double bestBuyer=0.0;
+			int s=0;
+			for(int i=0; i<env.getBuyerBankBalance().size(); i++){
+				if (env.getBuyerBankBalance().get(m_buyers.get(i)) > bestBuyer){
+					bestBuyer = env.getBuyerBankBalance().get(m_buyers.get(i));
+					s = i;
+				}
+			}
+			System.out.println("BEST BUYER IS: " + s + " banlance: " + bestBuyer);
+			System.out.println("MAE for day " + day + " is " + env.getDailyRepDiff().get(0) + " " + env.getDailyRepDiff().get(1));
+			// System.out.println("MCC for day " + day + " is " + env.getDailyMCC().get(0) + " " + env.getDailyMCC().get(1));
+		}
 
 		return transList;
 	}
@@ -156,19 +166,19 @@ public class CentralAuthority {
             }
         }*/
 		m_buyers = env.getBuyerList();
-//System.out.println(m_buyers.get(index))
+		//System.out.println(m_buyers.get(index))
 		for(int i = 0; i < numBuyers; i++){
 			int bid = i;
 			if(m_buyers.get(bid).isIshonest() == false){
 				// m_buyers.get(bid).perform_model(day);
 				m_buyers.get(bid).addTransaction(day);
-                             // try{
-                             //     env.createARFFfile();
-                             // }
-                             // catch(Exception e){}
+				// try{
+				//     env.createARFFfile();
+				// }
+				// catch(Exception e){}
 
 
-                        }
+			}
 		}
 	}
 
@@ -190,8 +200,8 @@ public class CentralAuthority {
 				m_buyers.get(bid).addTransaction(day);
 			}
 		}
-             //   m_buyers.get(0).calMAE(day);
-              /*    for(int i=0; i<m_buyers.size(); i++){
+		//   m_buyers.get(0).calMAE(day);
+		/*    for(int i=0; i<m_buyers.size(); i++){
                                     m_buyers.get(i).setDay(day+1);
                                 }*/
 	}
@@ -308,7 +318,7 @@ public class CentralAuthority {
 		transList = new ArrayList();
 		//output the result: [|transactions|, time]
 		//      double[][][][] results = new double[runtimes][defenseNames.length][attackNames.length][2];
-		for(int i = 0; i < 1; i++){
+		for(int i = 0; i < 2; i++){
 			for(int j = 0; j < defenseNames.size(); j++){            
 				for(int k = 0; k < attackNames.size(); k++){                 
 					//            System.err.print("  runtimes = " + i + ",   defense = " + defenseNames[j] + ",   attack = " + attackNames[k]);
@@ -347,6 +357,16 @@ public class CentralAuthority {
 
 	public void displaySuggestions(){
 
+	}
+
+
+	public Environment getEnv() {
+		return env;
+	}
+
+
+	public void setEnv(Environment env) {
+		this.env = env;
 	}
 
 
