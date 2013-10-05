@@ -10,6 +10,7 @@
 package defenses;
 
 import java.util.*;
+
 import distributions.PseudoRandom;
 import agent.*;
 import environment.*;
@@ -321,14 +322,14 @@ public double calculateTrust(Seller seller,Buyer honestBuyer){
 			trustValues.add(k,calculateTrust(honestBuyer.getSeller(sid),honestBuyer));
 
 
-			mccValues.add(k,calculateMCCofAdvisorTrust(sid));
+		//	mccValues.add(k,calculateMCCofAdvisorTrust(sid));
 
 
 		}
 		//update the daily reputation difference
 
 		ecommerce.updateDailyReputationDiff(trustValues);
-		ecommerce.updateDailyMCC(mccValues);
+		//ecommerce.updateDailyMCC(mccValues);
 
 		//select seller with the maximum trust values from the two target sellers
 		int sellerid = Parameter.TARGET_DISHONEST_SELLER;
@@ -346,5 +347,19 @@ public double calculateTrust(Seller seller,Buyer honestBuyer){
 
         public void calculateReputation1(Buyer buyer,Seller seller){}
         public void calculateReputation2(Buyer buyer, Seller seller){}
+
+		@Override
+		public void calculateReputation1(Buyer buyer1, Seller sid,
+				ArrayList<Boolean> trustAdvisors) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public ArrayList<Boolean> calculateReputation2(Buyer buyer, Seller sid,
+				ArrayList<Boolean> trustAdvisors) {
+			// TODO Auto-generated method stub
+			return null;
+		}
 
 }//class

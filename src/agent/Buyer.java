@@ -220,35 +220,26 @@ public class Buyer extends Agent{
 	//create transaction that includes buyer, seller and product
 	public Instance addTransaction(int day){
 		this.day = ecommerce.getDay();
-		int dVal, bVal, sVal=0, productid; double mae=0.0;
+		int dVal, bVal, sVal=0, productid; 
 		Seller s1 = null;
 		String bHonestVal = null;
 		String shonest = null;
 
 		if (ishonest==false){ //attack
 			//select seller and product, then create transaction
-
 			s1 = attackModel.chooseSeller(this);
 			bHonestVal = Parameter.agent_dishonest;
 		}
 		else if (ishonest==true){//defense
 			s1 = defenseModel.chooseSeller(this, ecommerce);
 			bHonestVal = Parameter.agent_honest;
-
 		}
 		this.day = day;
 		Instances transactions = ecommerce.getM_Transactions();
 		Instances balances = ecommerce.getBalances();
 		double rVal = Parameter.nullRating();
 
-		if (s1.ishonest == true){
-			double newBal = ecommerce.getBuyerBankBalance().get(this) + 1.0;
-			ecommerce.getBuyerBankBalance().put(this, newBal);
-		}
-		else {
-			double newBal = ecommerce.getBuyerBankBalance().get(this) - 1.0;
-			ecommerce.getBuyerBankBalance().put(this, newBal);
-		}
+		this.getAccount().credits(s1);
 
 		double salePrice;
 
@@ -259,7 +250,7 @@ public class Buyer extends Agent{
 		//Buyer buyer, Seller seller, Product product, int quantity, double price, int day, double amountPaid, double value, int cid
 		t.create(this, s1, p, 1, p.getPrice(), day, p.getPrice()*1, currentRating, 1);
 		ecommerce.getTransactionList().add(t);
-		account.editBalance(p.getPrice(), t);
+		this.account.editBalance(p.getPrice(), t);
 		s1.getAccount().addToBalance(p.getPrice());
 		sellersRated.add(s1);
 		productsPurchased.add(p);

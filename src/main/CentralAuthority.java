@@ -17,19 +17,10 @@ public class CentralAuthority {
 	private String m_attackName;
 	private ArrayList<Buyer> m_buyers = new ArrayList<Buyer>();
 	private ArrayList<Seller> m_sellers = new ArrayList<Seller>();
-
-	//sellers sales, reputation, reputation difference per day
-	//    private int[][] m_dailySales;
-	//    private double[][] m_dailyRep;
-	//    private double[][] m_dailyRepDiff;
-	//Defense model cost time per day
-	//  private double[] defenseTime_day;
+	private BankBalance bankbalance ;
 	ArrayList<Double> defenseTime_day= new ArrayList<Double>();
 	ArrayList<Double> honest_avgWt;
 	ArrayList<Double> dishonest_avgWt;
-	//    private double[][] m_dailyAvgWeights;
-	//    private double[][] m_dailyMCC;
-
 	ArrayList transList;
 	public CentralAuthority(){          
 		//            m_dailySales = new int[Parameter.NO_OF_DAYS + 1][Parameter.NO_OF_DISHONEST_SELLERS + Parameter.NO_OF_HONEST_SELLERS];
@@ -51,50 +42,22 @@ public class CentralAuthority {
 
 
 	public void setUpEnvironment(String attackName, String defenseName)throws Exception{
-		//System.out.println("enters setUp Environment");
 		env.eCommerceSetting(attackName, defenseName);
-		//  env.agentSetting(attackName, defenseName);
 	}
 
 	public ArrayList simulateEnvironment(String attackName, String defenseName, boolean dailyPrint) throws ClassNotFoundException, NoSuchMethodException, SecurityException,Exception{
 
 
 		System.out.println("enters simulateEnvironment "+attackName+"  "+defenseName);
-		//step 1: initialize initialize the e commerce
 		m_attackName = new String(attackName);
 		m_defenseName = new String(defenseName);
 		setUpEnvironment(attackName, defenseName);      
 		transList = new ArrayList();
-		//TODO discuss about the name specification
 		m_buyers=env.getBuyerList();
 		m_sellers=env.getSellerList();
 
-		//Day 0 is the eve of Day 1 (only for agents' decision making), transactions start on Day 1             
 		for (int day = 0; day < Parameter.NO_OF_DAYS; day++){                                                   
-			if (day != 0){
-				for (int count = 0; count<m_buyers.size();count++){
-					m_buyers.get(count).setCredits(m_buyers.get(count).getCredits()+Parameter.CREDITS_PER_TURN);
-				}
-			}
-
-			for (int a = 0; a<PseudoRandom.randInt(1, Parameter.transaction_limit);a++){
-				DecimalFormat roundoff = new DecimalFormat("#.##");
-				//Transaction trans = new Transaction();
-				//  trans.setDay(day);
-				//	m_buyers.get(a).addTransaction(day);
-
-				/*       double cost = trans.getQuantity()*trans.getPrice();
-                cost = Double.valueOf(roundoff.format(cost));
-                if (cost>m_buyers.get(trans.getBuyer().getId()).getCredits()){
-                    trans.setRemarks("Transaction Failed: Buyer not enough Credit");
-                } else {
-                    trans.setRemarks("Transaction Successful");
-                    m_buyers.get(trans.getBuyer().getId()).setCredits(m_buyers.get(trans.getBuyer().getId()).getCredits()-cost);
-                }
-                transList.add(trans);
-				 */
-			}
-
+			
 			//step 2: Attack model (dishonest buyers)               
 			attack(day);            
 
@@ -102,52 +65,15 @@ public class CentralAuthority {
 			long defensetimeStart = new Date().getTime();
 			defense(day);   
 			long defensetimeEnd = new Date().getTime();
-			//TODO how to store transaction
-			//    defenseTime_day[day] = (-defensetimeStart + defensetimeEnd) / 1000.0;
+
 			defenseTime_day.set(day,(-defensetimeStart + defensetimeEnd) / 1000.0 );
-			//            m_dailySales = m_eCommerce.getDailySales();
-			//            m_dailyRep[day] = m_eCommerce.getDailyReputation();
-			//            m_dailyRepDiff[day] = m_eCommerce.getDailyReputationDiff();
-			//            m_dailyMCC[day] = m_eCommerce.getDailyMCC();
+
 			env.setDay(day); //update to next day
 			avgerWeights(day);
-			if(dailyPrint){
-				//print the transactions for different sellers
-				System.out.print("Day " + day + ": ");                  
-				System.out.print("   |sellers' transactions|: ");
-				for (int i = 0; i < Parameter.NO_OF_HONEST_SELLERS   + Parameter.NO_OF_DISHONEST_SELLERS; i++) {
-					if(i == Parameter.NO_OF_DISHONEST_SELLERS){
-						System.out.print(", ");
-					}                       
-					//                  System.out.print(" " + m_dailySales[day][i]);
-				}       
-				//                System.out.print("   |rep MAE|: " + m_dailyRep[day][0] + "  " + m_dailyRep[day][1]);
-				//                System.out.print("   |repDiff MAE|: " + m_dailyRepDiff[day][0] + "  " + m_dailyRepDiff[day][1]);
-				// System.out.println(" avgWeights: " + m_dailyAvgWeights[day][0] + "  " + m_dailyAvgWeights[day][1]);
-				System.out.println("avg. weights for dishonest: "+ dishonest_avgWt.get(day) +"  avg. weights for honest "+honest_avgWt.get(day));
+			bankbalance.updateDailyBankBalance(day, m_buyers);
+			bankbalance.printDailyBalance(day);
 
-			}
-			/*HashMap<Seller,Double> maeComp = new HashMap();
-                for(int i=0;i<m_buyers.size();i++){
-                   maeComp = m_buyers.get(i).getMAEList();
-                  for(int j=0;j<m_sellers.size();j++){
-                   System.out.println("MAE of seller "+m_sellers.get(j) +" "+maeComp.get(m_sellers.get(j)));
-                  }
-
-                }*/
-			/* for(int i=0; i<m_buyers.size(); i++){
-                                    m_buyers.get(i).setDay(day+1);
-                               }*/
-			//System.out.println()
-			double bestBuyer=0.0;
-			int s=0;
-			for(int i=0; i<env.getBuyerBankBalance().size(); i++){
-				if (env.getBuyerBankBalance().get(m_buyers.get(i)) > bestBuyer){
-					bestBuyer = env.getBuyerBankBalance().get(m_buyers.get(i));
-					s = i;
-				}
-			}
-			System.out.println("BEST BUYER IS: " + s + " banlance: " + bestBuyer);
+			//			System.out.println("BEST BUYER IS: " + s + " banlance: " + bestBuyer);
 			System.out.println("MAE for day " + day + " is " + env.getDailyRepDiff().get(0) + " " + env.getDailyRepDiff().get(1));
 			// System.out.println("MCC for day " + day + " is " + env.getDailyMCC().get(0) + " " + env.getDailyMCC().get(1));
 		}
@@ -158,13 +84,7 @@ public class CentralAuthority {
 	private void attack(int day){
 
 		int numBuyers = Parameter.NO_OF_DISHONEST_BUYERS + Parameter.NO_OF_HONEST_BUYERS;
-		//Attack model (dishonest buyers), give rating/ perform attack              
-		/*  for(int i = 0; i < numBuyers; i++){
-            int bid = i;
-            if(m_buyers.get(bid).isIshonest() == false){
-                m_buyers.get(bid).giveRating(day);
-            }
-        }*/
+
 		m_buyers = env.getBuyerList();
 		//System.out.println(m_buyers.get(index))
 		for(int i = 0; i < numBuyers; i++){
@@ -185,34 +105,21 @@ public class CentralAuthority {
 	private void defense(int day){
 
 		int numBuyers = Parameter.NO_OF_DISHONEST_BUYERS + Parameter.NO_OF_HONEST_BUYERS;
-		//Attack model (dishonest buyers), give rating/ perform defense             
-		/* for(int i = 0; i < numBuyers; i++){
-            int bid = i;
-            if(m_buyers.get(bid).isIshonest() == true){
-                m_buyers.get(bid).giveRating(day);
-            }
-        }
-		 * /
-		 */
+
 		for(int i = 0; i < numBuyers; i++){
 			int bid = i;
 			if(m_buyers.get(bid).isIshonest() == true){
 				m_buyers.get(bid).addTransaction(day);
 			}
 		}
-		//   m_buyers.get(0).calMAE(day);
-		/*    for(int i=0; i<m_buyers.size(); i++){
-                                    m_buyers.get(i).setDay(day+1);
-                                }*/
+
 	}
 
 	private void avgerWeights(int day){
 
 		int db = Parameter.NO_OF_DISHONEST_BUYERS;
 		int hb = Parameter.NO_OF_HONEST_BUYERS; 
-		//  if(Parameter.includeWhitewashing()){
-		//    db = db + (day) * db;
-		//}       
+
 
 		//these code for trust models: trustworthiness for local/partial advisors;
 		if(Parameter.includeWMA(m_defenseName) || Parameter.includeEA(m_defenseName)){
@@ -318,7 +225,9 @@ public class CentralAuthority {
 		transList = new ArrayList();
 		//output the result: [|transactions|, time]
 		//      double[][][][] results = new double[runtimes][defenseNames.length][attackNames.length][2];
-		for(int i = 0; i < 2; i++){
+		for(int i = 0; i < 15; i++){
+			bankbalance = new BankBalance();
+
 			for(int j = 0; j < defenseNames.size(); j++){            
 				for(int k = 0; k < attackNames.size(); k++){                 
 					//            System.err.print("  runtimes = " + i + ",   defense = " + defenseNames[j] + ",   attack = " + attackNames[k]);

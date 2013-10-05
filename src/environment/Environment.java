@@ -318,7 +318,7 @@ public abstract class Environment {
 		//	attInfo2.addElement(new Attribute(Parameter.sellerBalString));
 
 		String instsName = new String("eCommerce2.arff");
-		Instances header = new Instances(instsName, attInfo2, m_Numdays * (m_NumBuyers));
+		Instances header = new Instances(instsName, attInfo2, m_Numdays * (m_NumBuyers+m_NumSellers)*2);
 		//set the class index
 		//      header.setSellerIndex(header.numAttributes() - 1);
 
@@ -447,6 +447,7 @@ public abstract class Environment {
 				b.attackSetting(attackName);
 				b.setIshonest(false); 
 				b.setEcommerce(this);
+				b.getAccount().setBalance(100.0);
 				buyerList.add(b);
 
 			}
@@ -454,6 +455,8 @@ public abstract class Environment {
 				Buyer b = new Buyer();
 				b.setId(bid);b.setIshonest(true);b.setDefenseName(defenseName);b.defenseSetting(defenseName);
 				b.setEcommerce(this);
+				b.getAccount().setBalance(100.0);
+
 				buyerList.add(b);
 
 			}
@@ -467,6 +470,8 @@ public abstract class Environment {
 				Seller s = new Seller();
 				s.setId(sid);s.setIshonest(false);
 				s.setEcommerce(this);
+				s.getAccount().setBalance(0.0);
+
 				sellerList.add(s);
 
 			} else{
@@ -474,6 +479,8 @@ public abstract class Environment {
 				Seller s = new Seller();
 				s.setId(sid);s.setIshonest(true);
 				s.setEcommerce(this);
+				s.getAccount().setBalance(0.0);
+
 				sellerList.add(s);
 
 			}
@@ -499,12 +506,7 @@ public abstract class Environment {
 		for(int i=0; i<productList.size(); i++){
 			productList.get(i).setListOfProducts(productList);
 		}
-		for(int i=0; i<sellerList.size(); i++){
-			sellerBankBalance.put(sellerList.get(i), 0.0);
-		}
-		for(int i=0; i<buyerList.size(); i++){
-			buyerBankBalance.put(buyerList.get(i), 0.0);
-		}
+	
 	} //agentSetting
 
 	//Instances data=new Instances("eCommerce.arff",attInfo,0);
@@ -696,28 +698,28 @@ public abstract class Environment {
 	}
 
 
-
-	public HashMap<Seller, Double> getSellerBankBalance() {
-		return sellerBankBalance;
-	}
-
-
-
-	public void setSellerBankBalance(HashMap<Seller, Double> sellerBankBalance) {
-		this.sellerBankBalance = sellerBankBalance;
-	}
-
-
-
-	public HashMap<Buyer, Double> getBuyerBankBalance() {
-		return buyerBankBalance;
-	}
-
-
-
-	public void setBuyerBankBalance(HashMap<Buyer, Double> buyerBankBalance) {
-		this.buyerBankBalance = buyerBankBalance;
-	}
+//
+//	public HashMap<Seller, Double> getSellerBankBalance() {
+//		return sellerBankBalance;
+//	}
+//
+//
+//
+//	public void setSellerBankBalance(HashMap<Seller, Double> sellerBankBalance) {
+//		this.sellerBankBalance = sellerBankBalance;
+//	}
+//
+//
+//
+//	public HashMap<Buyer, Double> getBuyerBankBalance() {
+//		return buyerBankBalance;
+//	}
+//
+//
+//
+//	public void setBuyerBankBalance(HashMap<Buyer, Double> buyerBankBalance) {
+//		this.buyerBankBalance = buyerBankBalance;
+//	}
 
 
 }//class

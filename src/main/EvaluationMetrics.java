@@ -12,9 +12,7 @@ public class EvaluationMetrics {
 	private double bankBalance;
 	private CentralAuthority ca;
 
-	public EvaluationMetrics(CentralAuthority ca){
-		this.ca = ca;
-	}
+	
 
 	/*public double calculateMAEofSellerReputation(int criteria,HashMap<Seller,Double> m_SellersTrueRep) {
 
