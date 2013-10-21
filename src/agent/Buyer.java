@@ -17,6 +17,7 @@ import main.Transaction;
 
 import defenses.BRS;
 import defenses.Defense;
+import defenses.eBay;
 import distributions.PseudoRandom;
 import main.Parameter;
 
@@ -55,7 +56,17 @@ public class Buyer extends Agent{
 
 	}
 
+	public double getCurrentRating() {
+		return currentRating;
+	}
+
+	public void setCurrentRating(double currentRating) {
+		this.currentRating = currentRating;
+	}
+	
+
 	public Buyer(){
+	
 	}
 
 	public boolean isIshonest() {
@@ -93,7 +104,7 @@ public class Buyer extends Agent{
 
 	//give rating
 	public void rateSeller(int day){
-
+		//System.out.println("buyer " + ishonest);
 		if(this.day > 0){//scan all the history information,
 			for (int i = 0; i < history.numInstances(); i++) {
 				Instance inst = history.instance(i);
@@ -106,6 +117,8 @@ public class Buyer extends Agent{
 				} else {
 					defenseModel.seteCommerce(ecommerce);
 					currentRating = defenseModel.giveFairRating(inst);
+					//.println(currentRating);
+
 
 				}				
 
@@ -118,7 +131,8 @@ public class Buyer extends Agent{
 
 	//set attack model
 	public Attack attackSetting(String attackName){
-		Attack attackModel= new AlwaysUnfair();
+		//Attack attackModel= new AlwaysUnfair();
+
 		try{
 			Class<?> class1 = Class.forName("attacks."+attackName.trim());
 			Constructor<?> cons = class1.getDeclaredConstructor();
@@ -145,9 +159,11 @@ public class Buyer extends Agent{
 		return attackModel;
 	}
 
+
 	//set defense model
 	public Defense defenseSetting(String defenseName) throws ClassNotFoundException, NoSuchMethodException, SecurityException{
-		defenseModel=  new BRS();
+		//defenseModel=  new eBay();
+		//System.out.println("HELLO " + defenseName);
 		try{
 			Class class1 = Class.forName("defenses."+defenseName.trim());
 			Constructor cons = class1.getDeclaredConstructor();
@@ -247,6 +263,7 @@ public class Buyer extends Agent{
 		Product p = s1.getProductsOnSale().get(0);
 		Transaction t = new Transaction();
 		rateSeller(day);
+		ecommerce.updateRatings(s1, currentRating);
 		//Buyer buyer, Seller seller, Product product, int quantity, double price, int day, double amountPaid, double value, int cid
 		t.create(this, s1, p, 1, p.getPrice(), day, p.getPrice()*1, currentRating, 1);
 		ecommerce.getTransactionList().add(t);
@@ -565,4 +582,5 @@ public class Buyer extends Agent{
 		this.advisors = advisors;
 	}
 
+	
 }

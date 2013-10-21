@@ -2,6 +2,8 @@ package environment;
 //import Transaction;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+
 import main.*;
 import weka.core.converters.*; //for arffsaver
 import java.io.*;
@@ -37,8 +39,6 @@ public abstract class Environment {
 	protected ArrayList<Transaction> transactionList;
 	protected ArrayList<Product> productList;
 
-
-//	protected int m_NumAtts = 6;                        //[ day, buyer_id, buyer_is_honest, seller_id, seller_is_honest, rating]
 	protected int m_Numdays;                                //days of transactions;
 	protected int m_NumBuyers;
 	protected int m_NumSellers;
@@ -49,42 +49,67 @@ public abstract class Environment {
 	//attack name and defense name
 	protected String m_AttackName = null;
 	protected String m_DefenseName = null;
-
-	//assign the true rating of sellers, binary: [-1, 0, 1], multinominal: [1,2,3,4,5], real: [0.0, 1.0]
-	//protected double[] m_SellersTrueRating;
-
-
-
 	protected HashMap<Seller,Double> m_SellersTrueRating; //added by neel
-	//assign the true reputation of sellers
-	//protected double[] m_SellersTrueRep;
 
 	protected HashMap<Seller,Double> m_SellersTrueRep;
 	protected HashMap<Seller, Double> sellerBankBalance = new HashMap<Seller, Double>();
 	protected HashMap<Buyer, Double> buyerBankBalance = new HashMap<Buyer, Double>();
 
-	protected int Day;
-	//[day][all seller] sales
-	//protected int[][] m_DailySales = null;
 
-	//previously - m_DailyMCC[day][dishonest/honest] = mccVal
-	protected HashMap<Integer, Double> dailyMCCHonestSeller = new HashMap<Integer, Double>();
+	protected HashMap<Seller, Double> positiveRatings = new HashMap<Seller, Double>();
+	protected HashMap<Seller, Double> negativeRatings = new HashMap<Seller, Double>();
+
+
+	protected int Day;
+
+	//protected HashMap<Integer, Double> dailyMCCHonestSeller = new HashMap<Integer, Double>();
 	protected HashMap<Integer, Double> dailyMCCDishonestSeller = new HashMap<Integer, Double>();
 	//previously - m_DailyRep[day][dishonest/honest] = reputation
 	protected HashMap<Integer, Double> dailyRepHonestSeller = new HashMap<Integer, Double>();
 	protected HashMap<Integer, Double> dailyRepDishonestSeller = new HashMap<Integer, Double>();
 	protected HashMap<Integer, Double> dailyRepDiffHonestSeller = new HashMap<Integer, Double>();
 	protected HashMap<Integer, Double> dailyRepDiffDishonestSeller = new HashMap<Integer, Double>();
-	//  protected HashMap<Seller,Integer> Seller_sales = new HashMap();
-	//  protected HashMap<Seller,Integer> Seller_day = new HashMap();
+	protected 		ArrayList<Double> mccValues = new ArrayList<Double>();
+	protected ArrayList<Double> trustOfAdvisors = new ArrayList<Double>();
+	protected MCC mcc = new MCC();
 
-	//[day][target dishonest/honest seller]: (|real reputation - predict reputation|)
-	//protected double[][] m_DailyRep = null;
-	//  protected HashMap<Seller,Double> m_DailyRep = new HashMap(); // based on the targeted honest/dishonest seller???
-	//protected double[][] m_DailyRepDiff = null;
-	//  protected HashMap<Seller,Double> m_DailyRepDiff = new HashMap();
-	//protected double[][] m_DailyMCC = null;
-	//  protected HashMap<Seller,Double> m_DailyMCC = new HashMap();
+
+
+	public HashMap<Seller, Double> getPositiveRatings() {
+		return positiveRatings;
+	}
+
+
+
+	public void setPositiveRatings(HashMap<Seller, Double> positiveRatings) {
+		this.positiveRatings = positiveRatings;
+	}
+
+
+
+	public HashMap<Seller, Double> getNegativeRatings() {
+		return negativeRatings;
+	}
+
+
+
+	public void setNegativeRatings(HashMap<Seller, Double> negativeRatings) {
+		this.negativeRatings = negativeRatings;
+	}
+
+
+
+	public MCC getMcc() {
+		return mcc;
+	}
+
+
+
+	public void setMcc(MCC mcc) {
+		this.mcc = mcc; 
+	}
+
+
 
 	protected Environment(){           // default constructor
 		buyerList = new ArrayList<Buyer>();
@@ -100,8 +125,7 @@ public abstract class Environment {
 			dailyRepHonestSeller.put(i,0.0);
 			dailyRepDiffDishonestSeller.put(i,0.0);
 			dailyRepDiffHonestSeller.put(i,0.0);
-			dailyMCCHonestSeller.put(i, 0.0);
-			dailyMCCDishonestSeller.put(i,0.0);
+
 		}
 
 	}
@@ -453,7 +477,10 @@ public abstract class Environment {
 			}
 			else{
 				Buyer b = new Buyer();
-				b.setId(bid);b.setIshonest(true);b.setDefenseName(defenseName);b.defenseSetting(defenseName);
+				b.setId(bid);
+				b.setIshonest(true);
+				b.setDefenseName(defenseName);
+				b.defenseSetting(defenseName);
 				b.setEcommerce(this);
 				b.getAccount().setBalance(100.0);
 
@@ -506,7 +533,7 @@ public abstract class Environment {
 		for(int i=0; i<productList.size(); i++){
 			productList.get(i).setListOfProducts(productList);
 		}
-	
+
 	} //agentSetting
 
 	//Instances data=new Instances("eCommerce.arff",attInfo,0);
@@ -544,7 +571,7 @@ public abstract class Environment {
 		//System.out.println(ishonest);
 		//vals[6]=currentRating;
 		data2.add(new Instance(1.0,vals));
-	//	System.out.println(data2.numInstances());
+		//	System.out.println(data2.numInstances());
 		//System.out.println(data2);
 
 		//System.out.println(data);
@@ -656,27 +683,27 @@ public abstract class Environment {
 	public void updateDailyReputationDiff(ArrayList<Double> trustVals){
 		int sidHonest = Parameter.TARGET_HONEST_SELLER;
 		int sidDishonest = Parameter.TARGET_DISHONEST_SELLER;
-		double new0 = dailyRepDishonestSeller.get(Day) + trustVals.get(0);
-		dailyRepDishonestSeller.put(Day, new0);
-		double new1 = dailyRepHonestSeller.get(Day) + trustVals.get(1);
-		dailyRepHonestSeller.put(Day,  new1);
-		double diff0 = dailyRepDiffDishonestSeller.get(Day) + Math.abs(m_SellersTrueRep.get(sellerList.get(sidDishonest)) - trustVals.get(0));
-		dailyRepDiffDishonestSeller.put(Day, diff0);
-		//.out.println(m_SellersTrueRep.get(sellerList.get(sidHonest-1)));
-		double diff1 = dailyRepDiffHonestSeller.get(Day) + Math.abs(m_SellersTrueRep.get(sellerList.get(sidHonest)) - trustVals.get(1));
-		dailyRepDiffHonestSeller.put(Day, diff1);
+		if (m_DefenseName.matches("eBay")){
+			double truehrep = positiveRatings.get(sellerList.get(sidHonest)) + negativeRatings.get(sellerList.get(sidHonest));
+			double truedhrep = positiveRatings.get(sellerList.get(sidDishonest)) + negativeRatings.get(sellerList.get(sidDishonest));
+			double diff0 = Math.abs(truedhrep - trustVals.get(0));
+			double diff1 = Math.abs(truehrep - trustVals.get(1));
+			dailyRepDiffDishonestSeller.put(Day, diff0);
+			dailyRepDiffHonestSeller.put(Day, diff1);
+		}
+		else {
+			double new0 = dailyRepDishonestSeller.get(Day) + trustVals.get(0);
+			dailyRepDishonestSeller.put(Day, new0);
+			double new1 = dailyRepHonestSeller.get(Day) + trustVals.get(1);
+			dailyRepHonestSeller.put(Day,  new1);
+			double diff0 = dailyRepDiffDishonestSeller.get(Day) + Math.abs(m_SellersTrueRep.get(sellerList.get(sidDishonest)) - trustVals.get(0));
+			dailyRepDiffDishonestSeller.put(Day, diff0);
+			double diff1 = dailyRepDiffHonestSeller.get(Day) + Math.abs(m_SellersTrueRep.get(sellerList.get(sidHonest)) - trustVals.get(1));
+			dailyRepDiffHonestSeller.put(Day, diff1);
+		}
 	}
 
 
-	public ArrayList<Double> getDailyMCC(){
-		ArrayList<Double> dm = new ArrayList<Double>();
-
-		double val0 = dailyMCCDishonestSeller.get(Day) / (Parameter.NO_OF_HONEST_BUYERS);
-		double val1 = dailyMCCHonestSeller.get(Day) / (Parameter.NO_OF_HONEST_BUYERS);
-		dm.add(0, val0);
-		dm.add(1, val1);
-		return dm;
-	}
 
 	public ArrayList<Double> getDailyReputation(){
 		ArrayList<Double> dr = new ArrayList<Double>();
@@ -690,36 +717,46 @@ public abstract class Environment {
 
 	public ArrayList<Double> getDailyRepDiff(){
 		ArrayList<Double> drd = new ArrayList<Double>();
+
 		double val0 = dailyRepDiffDishonestSeller.get(Day) / ((Day+1) * Parameter.NO_OF_HONEST_BUYERS);
 		double val1 = dailyRepDiffHonestSeller.get(Day) / ((Day+1) * Parameter.NO_OF_HONEST_BUYERS);
 		drd.add(0, val0);
 		drd.add(1,val1);
+
 		return drd;
 	}
 
 
-//
-//	public HashMap<Seller, Double> getSellerBankBalance() {
-//		return sellerBankBalance;
-//	}
-//
-//
-//
-//	public void setSellerBankBalance(HashMap<Seller, Double> sellerBankBalance) {
-//		this.sellerBankBalance = sellerBankBalance;
-//	}
-//
-//
-//
-//	public HashMap<Buyer, Double> getBuyerBankBalance() {
-//		return buyerBankBalance;
-//	}
-//
-//
-//
-//	public void setBuyerBankBalance(HashMap<Buyer, Double> buyerBankBalance) {
-//		this.buyerBankBalance = buyerBankBalance;
-//	}
+
+	public ArrayList<Double> getMccValues() {
+		return mccValues;
+	}
+
+
+
+	public void setMccValues(ArrayList<Double> mccValues) {
+		this.mccValues = mccValues;
+	}
+
+
+
+	public ArrayList<Double> getTrustOfAdvisors() {
+		return trustOfAdvisors;
+	}
+
+
+
+	public void setTrustOfAdvisors(ArrayList<Double> trustOfAdvisors) {
+		this.trustOfAdvisors = trustOfAdvisors;
+	}
+
+	public void updateRatings(Seller s, double rating){
+		if (rating ==-1.0)
+			negativeRatings.put(s, negativeRatings.get(s)+1);
+		else if(rating==1.0)
+			positiveRatings.put(s, positiveRatings.get(s)+1);
+
+	}
 
 
 }//class

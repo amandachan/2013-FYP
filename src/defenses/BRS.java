@@ -7,6 +7,7 @@ import distributions.BetaDistribution;
 import distributions.PseudoRandom;
 import environment.Environment;
 
+import main.MCC;
 import main.Parameter;
 import main.Product;
 import main.Rating;
@@ -16,9 +17,8 @@ import agent.Seller;
 public class BRS extends Defense{
 	private double quantile = 0.01;
 	private double rep_aBS = 0.5;		
-
+	
 	// private ArrayList<Boolean>trustAdvisors = new ArrayList<Boolean>();
-
 
 
 	private boolean iterative;
@@ -28,24 +28,26 @@ public class BRS extends Defense{
 		//System.out.println("in chooseseller method");
 		//calculate the trust values on target seller		
 		ArrayList<Double> trustValues = new ArrayList<Double>();
+		ArrayList<Double> mccValues = new ArrayList<Double>();
+
 		if (trustValues.size()==0){
 			for(int i=0; i<2; i++){
 				trustValues.add(0.0);
+				mccValues.add(0.0);
 			}
 		}
-		//ArrayList<Double> mccValues = new ArrayList<Double>();
 		Seller s = new Seller();
 		for (int k = 0; k < 2; k++) {				
 			int sid = Parameter.TARGET_DISHONEST_SELLER;
 			if (k == 1)sid = Parameter.TARGET_HONEST_SELLER;
 
 			trustValues.set(k,calculateTrust(honestBuyer.getSeller(sid),honestBuyer));
+			mccValues.set(k, ecommerce.getMcc().calculateMCC(sid, trustOfAdvisors));
 
 		}
 		//update the daily reputation difference
-
 		ecommerce.updateDailyReputationDiff(trustValues);
-		//ecommerce.updateDailyMCC(mccValues);
+		ecommerce.getMcc().updateDailyMCC(mccValues,ecommerce.getDay());
 
 		//select seller with the maximum trust values from the two target sellers
 		int sellerid = Parameter.TARGET_DISHONEST_SELLER;
@@ -62,7 +64,7 @@ public class BRS extends Defense{
 
 	public double calculateTrust(Seller sid, Buyer honestBuyer){
 		int bid = honestBuyer.getId();
-		 ArrayList<Double> trustOfAdvisors = new ArrayList<Double>(); 
+		 trustOfAdvisors = new ArrayList<Double>(); 
 		 if (trustOfAdvisors.size()==0){
 			 for(int h=0; h<totalBuyers; h++){
 				 trustOfAdvisors.add(0.0);

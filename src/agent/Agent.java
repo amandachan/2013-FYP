@@ -47,8 +47,8 @@ public abstract class Agent {
 	public Agent() { 
 		account = new Account();
 		account.create();
-		attackModel = new AlwaysUnfair();
-		defenseModel = new BRS();
+		//attackModel = new AlwaysUnfair();
+		//defenseModel = new BRS();
 
 		//history = new Instances(ecommerce.getM_Transactions());
 	}

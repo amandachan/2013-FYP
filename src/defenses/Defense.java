@@ -17,7 +17,6 @@ import main.Parameter;
 
 public abstract class Defense {
 	protected Environment ecommerce = null;
-
 	protected int day;
 	protected int dhBuyer = Parameter.NO_OF_DISHONEST_BUYERS;
 	protected int hBuyer = Parameter.NO_OF_HONEST_BUYERS;
@@ -27,6 +26,7 @@ public abstract class Defense {
 	protected int totalBuyers = dhBuyer + hBuyer;
 	protected int totalSellers = dhSeller + hSeller;
 	protected int m_NumInstances;	
+	protected ArrayList<Double> trustOfAdvisors;
 
 	//protected int[][][] BSR;   		// to store the [buyer][seller][binary rating -1, 1]
 	// store the trustworthiness of advisors;
