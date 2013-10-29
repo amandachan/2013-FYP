@@ -24,8 +24,8 @@ public class CentralAuthority {
 	ArrayList<Double> honest_avgWt;
 	ArrayList<Double> dishonest_avgWt;
 	ArrayList transList;
-	
-	
+
+
 
 	public CentralAuthority(){          
 		//            m_dailySales = new int[Parameter.NO_OF_DAYS + 1][Parameter.NO_OF_DISHONEST_SELLERS + Parameter.NO_OF_HONEST_SELLERS];
@@ -43,11 +43,11 @@ public class CentralAuthority {
 			honest_avgWt.add(i,0.0);
 
 		}
-		
+
 	}
 
 
-	
+
 
 	public void setUpEnvironment(String attackName, String defenseName)throws Exception{
 		env.eCommerceSetting(attackName, defenseName);
@@ -89,11 +89,18 @@ public class CentralAuthority {
 			//			System.out.println("BEST BUYER IS: " + s + " banlance: " + bestBuyer);
 			System.out.println("MAE for day " + day + " is " + env.getDailyRepDiff().get(0) + " " + env.getDailyRepDiff().get(1));
 			System.out.println("MCC for day " + day + " is " + env.getMcc().getDailyMCC(day).get(0) + " " + env.getMcc().getDailyMCC(day).get(1));
-			//for(int i=0; i<m_sellers.size(); i++){
-				//System.out.println(i + " Pos: " + env.getPositiveRatings().get(m_sellers.get(i)) + " Neg: " + env.getNegativeRatings().get(m_sellers.get(i)));
+			System.out.println("FNR for day " + day + " is " + env.getMcc().getDailyFNR(day).get(0) + " " + env.getMcc().getDailyFNR(day).get(1));
+			System.out.println("FPR for day " + day + " is " + env.getMcc().getDailyFPR(day).get(0) + " " + env.getMcc().getDailyFPR(day).get(1));
+			System.out.println("TPR for day " + day + " is " + env.getMcc().getDailyTPR(day).get(0) + " " + env.getMcc().getDailyTPR(day).get(1));
+			System.out.println("Accuracy for day " + day + " is " + env.getMcc().getDailyAcc(day).get(0) + " " + env.getMcc().getDailyAcc(day).get(1));
+			System.out.println("Precision for day " + day + " is " + env.getMcc().getDailyPrec(day).get(0) + " " + env.getMcc().getDailyPrec(day).get(1));
+			System.out.println("F-Measure for day " + day + " is " + env.getMcc().getDailyF(day).get(0) + " " + env.getMcc().getDailyF(day).get(1));
+			System.out.println();
+			//for(int i=0; i<m_sellers.size(); i++){R
+			//System.out.println(i + " Pos: " + env.getPositiveRatings().get(m_sellers.get(i)) + " Neg: " + env.getNegativeRatings().get(m_sellers.get(i)));
 			//}
 		}
-		
+
 
 		return transList;
 	}
@@ -242,7 +249,7 @@ public class CentralAuthority {
 		transList = new ArrayList();
 		//output the result: [|transactions|, time]
 		//      double[][][][] results = new double[runtimes][defenseNames.length][attackNames.length][2];
-		for(int i = 0; i < 1; i++){
+		for(int i = 0; i < 15; i++){
 			bankbalance = new BankBalance();
 
 			for(int j = 0; j < defenseNames.size(); j++){            
@@ -294,6 +301,6 @@ public class CentralAuthority {
 	public void setEnv(Environment env) {
 		this.env = env;
 	}
- 
+
 
 }

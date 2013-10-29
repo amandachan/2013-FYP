@@ -29,11 +29,25 @@ public class BRS extends Defense{
 		//calculate the trust values on target seller		
 		ArrayList<Double> trustValues = new ArrayList<Double>();
 		ArrayList<Double> mccValues = new ArrayList<Double>();
+		ArrayList<Double> FNRValues = new ArrayList<Double>();
+		ArrayList<Double> FPRValues = new ArrayList<Double>();
+		ArrayList<Double> accValues = new ArrayList<Double>();
+		ArrayList<Double> precValues = new ArrayList<Double>();
+		ArrayList<Double> fValues = new ArrayList<Double>();
+		ArrayList<Double> TPRValues = new ArrayList<Double>();
+
 
 		if (trustValues.size()==0){
 			for(int i=0; i<2; i++){
 				trustValues.add(0.0);
 				mccValues.add(0.0);
+				FNRValues.add(0.0);
+				accValues.add(0.0);
+				FPRValues.add(0.0);
+				precValues.add(0.0);
+				fValues.add(0.0);
+				TPRValues.add(0.0);
+
 			}
 		}
 		Seller s = new Seller();
@@ -43,11 +57,24 @@ public class BRS extends Defense{
 
 			trustValues.set(k,calculateTrust(honestBuyer.getSeller(sid),honestBuyer));
 			mccValues.set(k, ecommerce.getMcc().calculateMCC(sid, trustOfAdvisors));
+			FNRValues.set(k, ecommerce.getMcc().calculateFNR(sid, trustOfAdvisors));
+			accValues.set(k, ecommerce.getMcc().calculateAccuracy(sid, trustOfAdvisors));
+			FPRValues.set(k, ecommerce.getMcc().calculateFPR(sid, trustOfAdvisors));
+			precValues.set(k, ecommerce.getMcc().calculatePrecision(sid, trustOfAdvisors));
+			fValues.set(k, ecommerce.getMcc().calculateF(sid, trustOfAdvisors));
+			TPRValues.set(k, ecommerce.getMcc().calculateTPR(sid, trustOfAdvisors));
+
+
 
 		}
 		//update the daily reputation difference
 		ecommerce.updateDailyReputationDiff(trustValues);
 		ecommerce.getMcc().updateDailyMCC(mccValues,ecommerce.getDay());
+		ecommerce.getMcc().updateDailyFNR(FNRValues,ecommerce.getDay());
+		ecommerce.getMcc().updateDailyAcc(accValues,ecommerce.getDay());
+		ecommerce.getMcc().updateDailyFPR(FPRValues,ecommerce.getDay());
+		ecommerce.getMcc().updateDailyPrec(precValues,ecommerce.getDay());
+		ecommerce.getMcc().updateDailyF(fValues,ecommerce.getDay());
 
 		//select seller with the maximum trust values from the two target sellers
 		int sellerid = Parameter.TARGET_DISHONEST_SELLER;
