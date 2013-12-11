@@ -26,21 +26,28 @@ public class NoDefense extends Defense{
 
     public double calculateTrust(Seller sellerid,Buyer honestBuyer){
 
-        double neg_BS=0,pos_BS=0;
-        int bid = honestBuyer.getId();
+        double neg_BS=0,pos_BS=0, rep_aBS =0;
+        int bid = honestBuyer.getId();//honestBuyer.getBuyerTransactions().get(bid);
        // int[][][] BSR = ecommerce.getM_SellersTrueRating();//.getBuyerSellerRatingArray();
        // int[][] SR = ((eCommerceB)m_eCommerce).getSellerRatingArray();
         double SR=ecommerce.getSellersTrueRating(sellerid.getId());
-        Transaction buyerTrans=honestBuyer.getTrans().get(bid);
+      
+       // Transaction buyerTrans= honestBuyer.getBuyerTransactions(); //honestBuyer.getTrans().get(bid);honestBuyer.getBuyerTransactions();
        //double tr= buyerTrans.getRating().getCriteriaRatings().get(0).getCriteriaRatingValue();
-        if(sellerid.isIshonest()==true){
-        neg_BS = SR - buyerTrans.getRating().getCriteriaRatings().get(0).getCriteriaRatingValue(); //neg_BS = SR[sid][0] - BSR[bid][sid][0];
-        }
-        else{
-        pos_BS =SR - buyerTrans.getRating().getCriteriaRatings().get(1).getCriteriaRatingValue(); //pos_BS = SR[sid][1] - BSR[bid][sid][1];
-        }
-        double rep_aBS = (pos_BS + 1.0 * Parameter.m_laplace) / (neg_BS + pos_BS + 2.0 * Parameter.m_laplace);
+        for(int i=0;i<honestBuyer.getTrans().size(); i++){
+            if (honestBuyer.getTrans().get(i).getSeller().getId()==sellerid.getId()){
+                if(honestBuyer.getTrans().get(i).getRating().getCriteriaRatings().get(0).getCriteriaRatingValue() < 0)
+                    neg_BS = SR - honestBuyer.getTrans().get(i).getRating().getCriteriaRatings().get(0).getCriteriaRatingValue();  //buyerTrans.getRating().getCriteriaRatings().get(0).getCriteriaRatingValue();
+                if(honestBuyer.getTrans().get(i).getRating().getCriteriaRatings().get(0).getCriteriaRatingValue() > 0 )
+        pos_BS =SR - honestBuyer.getTrans().get(i).getRating().getCriteriaRatings().get(0).getCriteriaRatingValue(); //buyerTrans.getRating().getCriteriaRatings().get(1).getCriteriaRatingValue(); //pos_BS = SR[sid][1] - BSR[bid][sid][1];
 
+                
+             break;
+            } //for
+        }
+       
+        rep_aBS = (pos_BS + 1.0 * Parameter.m_laplace) / (neg_BS + pos_BS + 2.0 * Parameter.m_laplace);
+      
         return rep_aBS;
     }
 

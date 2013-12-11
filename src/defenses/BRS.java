@@ -93,7 +93,7 @@ public class BRS extends Defense{
 		int bid = honestBuyer.getId();
 		 trustOfAdvisors = new ArrayList<Double>(); 
 		 if (trustOfAdvisors.size()==0){
-			 for(int h=0; h<totalBuyers; h++){
+			 for(int h=0; h<ecommerce.getBuyerList().size(); h++){
 				 trustOfAdvisors.add(0.0);
 			 }
 		 }
@@ -103,9 +103,9 @@ public class BRS extends Defense{
 
 		int aid =0; boolean checkTrans = false;
 		//find buyers that have transaction with seller
-		for (int j = 0; j < totalBuyers; j++) {
+		for (int j = 0; j < ecommerce.getBuyerList().size(); j++) {
 			aid = j;
-			if (aid == (Parameter.NO_OF_DISHONEST_BUYERS + Parameter.NO_OF_HONEST_BUYERS)) 
+			if (aid == (ecommerce.getBuyerList().size())) 
 				break;
 			trustAdvisors.add(aid,true);
 			//search through buyer's transactions
@@ -129,7 +129,7 @@ public class BRS extends Defense{
 			trustAdvisors = calculateReputation2(honestBuyer, sid, trustAdvisors);
 		} while(iterative);
 
-		ArrayList<Integer> storedAdvisors = honestBuyer.getAdvisors();
+		Vector<Integer> storedAdvisors = honestBuyer.getAdvisors();
 		storedAdvisors.clear(); double bsr0=0; double bsr1=0;
 		ArrayList<Double> np_BAforS = new ArrayList<Double>(2);	
 		if (np_BAforS.size()==0){
@@ -137,7 +137,7 @@ public class BRS extends Defense{
 				np_BAforS.add(i, 0.0);
 			}
 		}
-		for (int n = 0; n < totalBuyers; n++) {
+		for (int n = 0; n < ecommerce.getBuyerList().size(); n++) {
 			aid = n;
 			if (aid == bid)continue;  //ignore its own rating
 			if (trustAdvisors.get(aid)== false)continue; //buyer no transaction with seller
@@ -182,7 +182,7 @@ public class BRS extends Defense{
 			}
 		}
 		double bsr0 =0; double bsr1=0;
-		for (int m = 0; m < totalBuyers; m++) {
+		for (int m = 0; m < ecommerce.getBuyerList().size(); m++) {
 			int aid = m;
 			if (aid == b.getId())continue;  //ignore its own rating
 			if (trustAdvisors.get(aid) == false)continue;	//no transaction with seller
@@ -211,7 +211,7 @@ public class BRS extends Defense{
 
 	// step 2: calculate the reputation for seller based on one buyer		
 	public ArrayList<Boolean> calculateReputation2(Buyer b, Seller sid, ArrayList<Boolean> trustAdvisors){
-		for (int j = 0; j < totalBuyers; j++) {
+		for (int j = 0; j < ecommerce.getBuyerList().size(); j++) {
 			int aid = j;
 			double bsr0=0; double bsr1=0;
 			if (trustAdvisors.get(aid)== false)continue;	

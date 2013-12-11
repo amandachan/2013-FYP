@@ -7,7 +7,11 @@ import agent.Buyer;
 
 public class BankBalance extends EvaluationMetrics{
 	
-	HashMap<Integer, ArrayList<Double> > bankBalance = new HashMap<Integer, ArrayList<Double>>();
+	HashMap<Integer, ArrayList<Double> > bankBalance;
+	
+	public BankBalance(){
+		bankBalance = new HashMap<Integer, ArrayList<Double>>();
+	}
 	
 
 	public HashMap<Integer, ArrayList<Double>> getBankBalance() {

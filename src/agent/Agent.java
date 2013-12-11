@@ -19,7 +19,7 @@ public abstract class Agent {
 	protected int id;
 	protected boolean ishonest;
 	protected int day;
-	protected Instances history;
+	protected Instances history ;
 	protected Environment ecommerce = null;
 	protected ArrayList<Seller> listOfSellers = new ArrayList<Seller>();
 	protected ArrayList<Buyer> listOfBuyers = new ArrayList<Buyer>();
@@ -99,10 +99,8 @@ public abstract class Agent {
 		return ecommerce;
 	}
 
-	public void setEcommerce(EnvironmentS ecommerce) {
-		this.ecommerce = ecommerce;
-	}
-
+	
+	
 	public ArrayList<Seller> getListOfSellers() {
 		return listOfSellers;
 	}
@@ -168,6 +166,7 @@ public abstract class Agent {
 	}
 
 	public void addInstance(Instance inst){
+		if(history== null) history =ecommerce.getM_Transactions();
 		history.add(inst);
 	}
 
@@ -181,8 +180,12 @@ public abstract class Agent {
 
 	public void setEcommerce(Environment ecommerce) {
 		this.ecommerce = ecommerce;
+		
 		history = new Instances(ecommerce.getM_Transactions());
 	}
-
+	public void setEcommerce(EnvironmentR ecommerce) {
+		this.ecommerce = ecommerce;
+	}
+	
 
 }

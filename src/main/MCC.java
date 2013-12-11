@@ -391,6 +391,7 @@ public class MCC extends EvaluationMetrics{
 	}
 
 	public void updateDailyMCC(ArrayList<Double> mccVals, int day){
+	
 		dailyMCCdishonest.put(day, dailyMCCdishonest.get(day)+mccVals.get(0));
 		dailyMCChonest.put(day,  dailyMCChonest.get(day)+mccVals.get(1));
 	}

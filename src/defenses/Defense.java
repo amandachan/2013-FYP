@@ -23,8 +23,7 @@ public abstract class Defense {
 	protected int dhSeller = Parameter.NO_OF_DISHONEST_SELLERS;
 	protected int hSeller = Parameter.NO_OF_HONEST_SELLERS;
 	protected String defenseName = null;
-	protected int totalBuyers = dhBuyer + hBuyer;
-	protected int totalSellers = dhSeller + hSeller;
+
 	protected int m_NumInstances;	
 	protected ArrayList<Double> trustOfAdvisors;
 

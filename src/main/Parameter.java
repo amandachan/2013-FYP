@@ -45,7 +45,7 @@ public class Parameter {
 		
 	//Scheduler Configuration
 	public static int NO_OF_DAYS = 10;
-	public static int NO_OF_RUNTIMES = 15;
+	public static int NO_OF_RUNTIMES = 1;
 	
 	//Attack and Defense Model Name(s)
 	public static List atkNameList = null;

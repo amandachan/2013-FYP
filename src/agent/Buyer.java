@@ -15,21 +15,18 @@ import main.Product;
 import main.Rating;
 import main.Transaction;
 
-import defenses.BRS;
-import defenses.Defense;
-import defenses.eBay;
+import defenses.*;
 import distributions.PseudoRandom;
 import main.Parameter;
 
-import attacks.AlwaysUnfair;
-import attacks.Attack;
-import attacks.Camouflage;
+import attacks.*;
 
 public class Buyer extends Agent{
 
 	public HashMap<Integer,Double> MAEList =new HashMap();
 
-
+	private ArrayList<Integer> sameRatingH = new ArrayList<Integer>();
+	private ArrayList<Integer> sameRatingDH = new ArrayList<Integer>();
 	private boolean ishonest;
 	private ArrayList<Rating> ratingsToProducts;
 	private ArrayList<Product> productsPurchased = new ArrayList<Product>();
@@ -39,7 +36,7 @@ public class Buyer extends Agent{
 	private double currentRating;
 
 	//for building buyer's trust network
-	private ArrayList<Integer> advisors = new ArrayList<Integer>();
+	private Vector<Integer> advisors = new Vector<Integer>();
 	private ArrayList<Double> trusts = new ArrayList<Double>();
 	private double[][] m_SaverTA = new double[2][2];
 	private int depthLimit = 4;
@@ -52,9 +49,39 @@ public class Buyer extends Agent{
 
 	public Buyer (int id){
 
+		for(int i=0; i<Parameter.NO_OF_DISHONEST_BUYERS+Parameter.NO_OF_HONEST_BUYERS; i++){
+			sameRatingH.add(0);
+			sameRatingDH.add(0);
+		}
 		this.id = id;
 
 	}
+
+
+
+	public ArrayList<Integer> getSameRatingH() {
+		return sameRatingH;
+	}
+
+
+
+	public void setSameRatingH(ArrayList<Integer> sameRatingH) {
+		this.sameRatingH = sameRatingH;
+	}
+
+
+
+	public ArrayList<Integer> getSameRatingDH() {
+		return sameRatingDH;
+	}
+
+
+
+	public void setSameRatingDH(ArrayList<Integer> sameRatingDH) {
+		this.sameRatingDH = sameRatingDH;
+	}
+
+
 
 	public double getCurrentRating() {
 		return currentRating;
@@ -63,10 +90,14 @@ public class Buyer extends Agent{
 	public void setCurrentRating(double currentRating) {
 		this.currentRating = currentRating;
 	}
-	
+
 
 	public Buyer(){
-	
+
+		for(int i=0; i<Parameter.NO_OF_DISHONEST_BUYERS+Parameter.NO_OF_HONEST_BUYERS; i++){
+			sameRatingH.add(0);
+			sameRatingDH.add(0);
+		}
 	}
 
 	public boolean isIshonest() {
@@ -132,7 +163,6 @@ public class Buyer extends Agent{
 	//set attack model
 	public Attack attackSetting(String attackName){
 		//Attack attackModel= new AlwaysUnfair();
-
 		try{
 			Class<?> class1 = Class.forName("attacks."+attackName.trim());
 			Constructor<?> cons = class1.getDeclaredConstructor();
@@ -232,6 +262,80 @@ public class Buyer extends Agent{
 		return price;
 	}
 
+	public Instance addTransaction(int day, Seller s){
+
+		this.day = ecommerce.getDay();
+		int dVal, bVal, sVal=0, productid; 
+		defenseModel.chooseSeller(this, ecommerce);
+		this.day = day;
+		Instances transactions = ecommerce.getM_Transactions();
+		history = transactions;
+		Instances balances = ecommerce.getBalances();
+		double rVal = Parameter.nullRating();
+
+		this.getAccount().credits(s);
+
+		double salePrice;
+		String bHonestVal = "honest";
+
+
+		Product p = s.getProductsOnSale().get(0);
+		Transaction t = new Transaction();
+		rateSeller(day);
+		ecommerce.updateRatings(s, currentRating);
+		t.create(this, s, p, 1, p.getPrice(), day, p.getPrice()*1, currentRating, 1);
+		ecommerce.getTransactionList().add(t);
+		this.account.editBalance(p.getPrice(), t);
+		s.getAccount().addToBalance(p.getPrice());
+		sellersRated.add(s);
+		productsPurchased.add(p);
+		trans.add(t);
+		ecommerce.updateTransactionList(t);
+		sVal = s.getId();
+		s.addSales();
+		
+		double sHonestVal = ecommerce.getSellersTrueRating(s.getId());
+		rVal = ecommerce.getM_SellersTrueRating().get(s); //added by neel
+		//add instance, update the array in e-commerce
+		dVal = day + 1;
+		bVal = this.getId();
+
+		//System.out.println(bVal);
+		Instance inst = new Instance(transactions.numAttributes());
+		Instance inst1 = new Instance(balances.numAttributes());
+
+		inst.setDataset(transactions);
+		inst.setValue(Parameter.m_dayIdx, dVal);
+		inst.setValue(Parameter.m_bidIdx, "b" + Integer.toString(bVal)); 
+		inst.setValue(Parameter.m_bHonestIdx, bHonestVal);
+		inst.setValue(Parameter.m_sidIdx, "s" + Integer.toString(sVal));
+		inst.setValue(Parameter.m_sHonestIdx, sHonestVal);			
+		inst.setValue(Parameter.m_ratingIdx, rVal);	
+		this.addInstance(new Instance(inst));
+
+		inst1.setDataset(balances);
+		inst1.setValue(Parameter.m_dayIdx, dVal);
+		inst1.setValue(Parameter.m_bidIdx, "b" + Integer.toString(bVal)); 
+		inst1.setValue(Parameter.m_bbalIdx, this.getAccount().getBalance());
+		inst1.setValue(Parameter.m_pIdx, "p" + Integer.toString(p.getId()));
+		inst1.setValue(Parameter.m_ppriceIdx, p.getPrice());			
+		inst1.setValue(Parameter.m_sidIdx2, sVal);	
+		inst1.setValue(Parameter.m_sHonestIdx2, sHonestVal);			
+		inst1.setValue(Parameter.m_sbalIdx, s.getAccount().getBalance());		
+
+		ecommerce.createData(dVal,Integer.toString(bVal),bHonestVal,Integer.toString(sVal),sHonestVal,currentRating);
+		String shonest="honest";
+		ecommerce.createData2(dVal,Integer.toString(bVal),this.getAccount().getBalance(),Integer.toString(p.getId()),p.getPrice(), Integer.toString(sVal),shonest,s.getAccount().getBalance());
+
+		try{
+			ecommerce.createARFFfile();
+			ecommerce.createBalanceArff();
+		}
+		catch(Exception e){}
+
+		return inst;
+	}
+
 
 	//create transaction that includes buyer, seller and product
 	public Instance addTransaction(int day){
@@ -274,6 +378,7 @@ public class Buyer extends Agent{
 		trans.add(t);
 		ecommerce.updateTransactionList(t);
 		sVal = s1.getId();
+		s1.addSales();
 		if (s1.isIshonest()==true)
 			shonest = Parameter.agent_honest;
 		else
@@ -283,6 +388,8 @@ public class Buyer extends Agent{
 		//add instance, update the array in e-commerce
 		dVal = day + 1;
 		bVal = this.getId();
+
+		//System.out.println(bVal);
 		Instance inst = new Instance(transactions.numAttributes());
 		Instance inst1 = new Instance(balances.numAttributes());
 
@@ -306,7 +413,7 @@ public class Buyer extends Agent{
 		inst1.setValue(Parameter.m_sbalIdx, s1.getAccount().getBalance());		
 		//this.addInstance(new Instance(inst1));
 
-
+		//System.out.println("BANK BALANCE " + this.getAccount().getBalance());
 		ecommerce.createData(dVal,Integer.toString(bVal),bHonestVal,Integer.toString(sVal),sHonestVal,currentRating);
 		ecommerce.createData2(dVal,Integer.toString(bVal),this.getAccount().getBalance(),Integer.toString(p.getId()),p.getPrice(), Integer.toString(sVal),shonest,s1.getAccount().getBalance());
 
@@ -317,7 +424,7 @@ public class Buyer extends Agent{
 		catch(Exception e){}
 		//HashMap<Seller,Double> MAEList = new HashMap();
 
-	//	System.out.println("Buyer: " + this.getId() + " Seller: " + s1.getId() + " Buyer Balance: " + this.getAccount().getBalance() + " Seller Balnce: " + s1.getAccount().getBalance() + " Balance: " + ecommerce.getBuyerBankBalance().get(this) + " Rating: " + currentRating);
+		//	System.out.println("Buyer: " + this.getId() + " Seller: " + s1.getId() + " Buyer Balance: " + this.getAccount().getBalance() + " Seller Balnce: " + s1.getAccount().getBalance() + " Balance: " + ecommerce.getBuyerBankBalance().get(this) + " Rating: " + currentRating);
 		//   System.out.println("Seller ID: " + s1.getId() + " Buyer ID: " + this.getId() + " Rating: " + currentRating + " Day: " + day + " MAE " + mae);
 		return inst;
 	}
@@ -455,10 +562,10 @@ public class Buyer extends Agent{
 
 	private void findNeighbors(int type){
 		//two types = 0/1, from the limit/whole
-		ArrayList<Integer> neighbor = new ArrayList<Integer>();
+		Vector<Integer> neighbor = new Vector<Integer>();
 		int numBuyers = listOfBuyers.size(); 	
 		if(type == 0){//for dishonest buyers; collusion
-			ArrayList<Integer> limit = new ArrayList<Integer>();
+			Vector<Integer> limit = new Vector<Integer>();
 			int db = Parameter.NO_OF_DISHONEST_BUYERS;
 			int hb = Parameter.NO_OF_HONEST_BUYERS;	
 			if(TNtype == 0){//honest trust network
@@ -499,7 +606,7 @@ public class Buyer extends Agent{
 		}		
 	}
 
-	private void buildTrustNet(Buyer buyer, int depth, ArrayList<Integer> advisors){ 
+	private void buildTrustNet(Buyer buyer, int depth, Vector<Integer> advisors){ 
 		if(depth > depthLimit)return;			
 		ArrayList<Integer> sn = buyer.getTrustNetwork();
 		for(int i = 0; i < sn.size(); i++){
@@ -570,17 +677,17 @@ public class Buyer extends Agent{
 				fitness = 0.0;
 			}		
 			//initial witnesses
-			advisors = new ArrayList<Integer>();			
+			advisors = new Vector<Integer>();			
 		}
 	}
 
-	public ArrayList<Integer> getAdvisors() {
+	public Vector<Integer> getAdvisors() {
 		return advisors;
 	}
 
-	public void setAdvisors(ArrayList<Integer> advisors) {
+	public void setAdvisors(Vector<Integer> advisors) {
 		this.advisors = advisors;
 	}
 
-	
+
 }

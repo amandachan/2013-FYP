@@ -19,43 +19,43 @@ import main.Parameter;
 
 public class Camouflage extends Attack{
 
-    public Camouflage(){
-    }
+	public Camouflage(){
+	}
 
-    public double giveUnfairRating(Instance inst){
+	public double giveUnfairRating(Instance inst){
 
-        String bHonestVal = inst.stringValue(Parameter.m_bHonestIdx);
-        // find the dishonest buyer in <day>, give unfair rating
-        if (bHonestVal == Parameter.agent_honest){
-            System.out.println("error, must be dishonest buyer");
-        }
-        int sVal = (int)(inst.value(Parameter.m_sidIdx));
-        double rVal = 0.0;
-        if(sVal == Parameter.TARGET_DISHONEST_SELLER ||sVal == Parameter.TARGET_HONEST_SELLER){
-            //unfair ratings for target sellers
-            double unfairRating = complementRating(sVal);
-            rVal = unfairRating;
-        }
-        else if(sVal > Parameter.TARGET_DISHONEST_SELLER && sVal < Parameter.TARGET_HONEST_SELLER){
-            //fair rating for common sellers
-            rVal = ecommerce.getSellersTrueRating(sVal);
-        } else{
-            System.err.println("Not such rating");
-        }
-        // add the rating to instances
-        inst.setValue(Parameter.m_ratingIdx, rVal);
+		String bHonestVal = inst.stringValue(Parameter.m_bHonestIdx);
+		// find the dishonest buyer in <day>, give unfair rating
+		if (bHonestVal == Parameter.agent_honest){
+			System.out.println("error, must be dishonest buyer");
+		}
+		int sVal = (int)(inst.value(Parameter.m_sidIdx));
+		double rVal = 0.0;
+		if(sVal == Parameter.TARGET_DISHONEST_SELLER ||sVal == Parameter.TARGET_HONEST_SELLER){
+			//unfair ratings for target sellers
+			double unfairRating = complementRating(sVal);
+			rVal = unfairRating;
+		}
+		else if(sVal > Parameter.TARGET_DISHONEST_SELLER && sVal < Parameter.TARGET_HONEST_SELLER){
+			//fair rating for common sellers
+			rVal = ecommerce.getSellersTrueRating(sVal);
+		} else{
+			System.err.println("Not such rating");
+		}
+		// add the rating to instances
+		inst.setValue(Parameter.m_ratingIdx, rVal);
 
-        //update the eCommerce information
-        if (ecommerce.getM_Transactions()!= null)
-        ecommerce.getM_Transactions().add(new Instance(inst));
-       // ecommerce.getTransactions().add(new Instance(inst));
-       // ecommerce.updateArray(inst);
+		//update the eCommerce information
+		if (ecommerce.getM_Transactions()!= null)
+			ecommerce.getM_Transactions().add(new Instance(inst));
+		// ecommerce.getTransactions().add(new Instance(inst));
+		// ecommerce.updateArray(inst);
 
-        return rVal;
-    }
+		return rVal;
+	}
 
 
-  /*  public Instance perform_attack(int day, Buyer dishonestBuyer){
+	/*  public Instance perform_attack(int day, Buyer dishonestBuyer){
 
         this.day = day;
         Instances transactions = ecommerce.getM_Transactions();
@@ -94,23 +94,29 @@ public class Camouflage extends Attack{
 
         return inst;
     }
-*/
-    public String getParameterInfo(){
-        String str= "camouflage: ";
-        return str;
-    }
-    //randomly choose seller
+	 */
+	public String getParameterInfo(){
+		String str= "camouflage: ";
+		return str;
+	}
+	//randomly choose seller
 	public Seller chooseSeller(Buyer b){
 		//attack the target sellers with probability (Para.m_targetDomination), attack common sellers randomly with 1 - probability
 		int sellerid;
-		if(PseudoRandom.randDouble() < Parameter.m_dishonestBuyerOntargetSellerRatio){ //Para.m_targetDomination
-			sellerid = (PseudoRandom.randDouble() < 0.5)? Parameter.TARGET_DISHONEST_SELLER:Parameter.TARGET_HONEST_SELLER;
-		} else{
-			//1 + [0, 18) = [1, 19) = [1, 18]
+		if(b.getEcommerce().getDay()< 0.2 * Parameter.NO_OF_DAYS){ //|sellers| >= 20, 100, 500
+			//for common seller, give fair rating
 			sellerid = 1 + (int) (PseudoRandom.randDouble() * (Parameter.NO_OF_DISHONEST_SELLERS + Parameter.NO_OF_HONEST_SELLERS - 2));
-		}
+		}else{
+			//attack the target sellers with probability (Para.m_targetDomination), attack common sellers randomly with 1 - probability
+			if(PseudoRandom.randDouble() < Parameter.m_dishonestBuyerOntargetSellerRatio){ //Para.m_targetDomination
+				sellerid = (PseudoRandom.randDouble() < 0.5)? Parameter.TARGET_DISHONEST_SELLER:Parameter.TARGET_HONEST_SELLER;
+			}else{
+				//1 + [0, 18) = [1, 19) = [1, 18]
+				sellerid = 1 + (int) (PseudoRandom.randDouble() * (Parameter.NO_OF_DISHONEST_SELLERS + Parameter.NO_OF_HONEST_SELLERS - 2));
+			}
+		}		
 		return b.getSeller(sellerid);
-             //   return sellerid;
+		//   return sellerid;
 	}
 }//CLASS CAMOUFLAGE
 
